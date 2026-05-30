@@ -411,7 +411,7 @@ Bravo 분대장이 "시스템 아키텍처 다이어그램" 임무를 받음
 → /create-image Decision Tree 확인
 → 조직도로 판단 → SVG 방식 선택
 → haiku 모델로 분대원 투입
-→ C:/Users/home/Desktop/architecture.svg 생성
+→ {프로젝트루트}/output/architecture.svg 생성
 → 소대장에게 파일 경로 보고
 ```
 
@@ -461,6 +461,53 @@ name: 백호-platoon-formation
 - **개발 & 인프라**: api-builder, ui-ux-builder, db-schema, cicd-setup
 - **콘텐츠 & 생성**: slideshow-web, youtube-generate, create-image, doc-generator
 - **품질 & 보안**: review-evaluate, security-audit, troubleshoot, e2e-test, api-test, performance-check
+
+### 스킬별 핵심 역할 — 자기완결 설명
+
+표에 열거된 스킬이 모두 설치된 환경이 아니어도, 분대장·분대원은 **각 스킬이 무엇을 자동화하는지를 본 본문만 보고 이해**할 수 있다. 스킬이 설치돼 있으면 호출, 없으면 분대장이 직접 동일 절차를 수행한다.
+
+**프로젝트 관리**
+
+- **`/sal-grid-dev`** — SAL Grid Dev Suite. `Stage(S) × Area(A) × Level(L)` 3차원 좌표계로 모든 Task를 식별하고, `TASK_PLAN.md` + `grid_records/*.json` + `task-instructions/*.md` + `verification-instructions/*.md` + `stage_gate_records/*.json` + `index.json` 7개 인공물을 SSOT(Single Source of Truth)로 유지하는 개발방법론. **자기완결 대안**: 청룡 스킬이 없으면, Phase 6.3에 기술된 grid_records JSON 구조를 분대장이 직접 작성·갱신.
+
+**팀 편성**
+
+- **`/deploy-subagent`** — 분대원 투입 시 2단계 Fallback: ① 1순위 사용자 커스텀 에이전트(`~/.claude/agents/{name}.md`) 또는 표준 11종(frontend-developer, ux-ui-designer, …) 탐색 → ② 2순위 내장 subagent_type(`general-purpose`, `Plan`, `Explore`) 사용. **자기완결 대안**: 본 스킬 부재 시 분대장이 Phase 3 본문의 정규병 12종 / 예비병 3종 표를 직접 보고 적절한 에이전트를 Task 도구로 투입.
+- **`/deploy-skill`** — 임무 분석 후 사용할 스킬 조합을 자동 선정·장착. **자기완결 대안**: 분대장이 위 스킬 표에서 임무에 맞는 항목을 직접 선택.
+- **`/find-skills`** — `skills.sh` 등 외부 스킬 마켓플레이스에서 임무에 적합한 신규 스킬을 검색·설치. **자기완결 대안**: 분대장이 GitHub/웹 검색으로 직접 탐색하여 `~/.claude/skills/`에 수동 설치.
+
+**개발 & 인프라**
+
+- **`/api-builder`** — REST API 구축 (Express/Fastify/Hono 등) + CRUD 라우트 + Zod 입력 검증 + 에러 핸들러 자동 생성. **자기완결 대안**: 분대장이 api-developer 분대원에게 "Zod 스키마로 검증되는 REST CRUD API 구축" 지시.
+- **`/ui-ux-builder`** — UX wireframe 설계 + UI 컴포넌트 구현 (React/Vue/Svelte + Tailwind/shadcn 등). **자기완결 대안**: ux-ui-designer + frontend-developer 분대원 순차 투입.
+- **`/db-schema`** — DB 스키마 설계 + RLS 정책 + 마이그레이션 스크립트 (Supabase/PostgreSQL 중심). **자기완결 대안**: database-developer 분대원에게 ERD + DDL + 마이그레이션 일괄 지시.
+- **`/cicd-setup`** — GitHub Actions CI/CD 파이프라인 yaml 자동 생성 (build/test/deploy 3단계). **자기완결 대안**: devops 분대원에게 `.github/workflows/` yaml 작성 지시.
+
+**콘텐츠 & 생성**
+
+- **`/slideshow-web`** — PPT 슬라이드쇼를 HTML/CSS 기반 웹페이지로 변환 + GitHub Pages 등 공유. **자기완결 대안**: content-copy + frontend-developer 협업.
+- **`/youtube-generate`** — YouTube 영상 자동 제작 (스크립트 + AI 음성 + 영상 합성). **자기완결 대안**: 외부 도구 미설치 시 분대원으로 일부 단계만 수행.
+- **`/create-image`** — 이미지 생성 Decision Tree: 시퀀스 다이어그램 → Mermaid / 대시보드 → HTML→PNG / 조직도 → SVG / 사진·일러스트 → AI 모델. **자기완결 대안**: 분대장이 직접 위 Decision Tree를 적용하여 분대원에게 형식 지정 지시.
+- **`/doc-generator`** — PDF/DOCX/PPTX/XLSX/HWP 문서 생성 (python-docx, openpyxl, reportlab 등). **자기완결 대안**: doc-writer 분대원에게 형식·내용 지시.
+
+**품질 & 보안**
+
+- **`/review-evaluate`** — 산출물을 5기준(완전성/정확성/명확성/구조/품질) × 20점 = 100점 만점으로 평가, 점수 미달 시 최대 10 Round 재수정 루프. **자기완결 대안**: 분대장이 동일 5기준을 적용하여 code-reviewer 분대원에게 수동 평가 지시 + Round별 수정.
+- **`/security-audit`** — OWASP Top 10 기준 보안 감사 (XSS, SQLi, CSRF, IDOR, …). **자기완결 대안**: security-specialist 분대원에게 OWASP Top 10 체크리스트 수동 점검 지시.
+- **`/troubleshoot`** — 디버깅 / RCA (Root Cause Analysis) / 재현 단계 정리. **자기완결 대안**: debugger 분대원 투입.
+- **`/e2e-test`** — Playwright 기반 E2E 자동 테스트 작성 + 실행. **자기완결 대안**: test-runner 분대원에게 Playwright `*.spec.ts` 작성 지시.
+- **`/api-test`** — Jest/Supertest 기반 API 단위·통합·부하 테스트. **자기완결 대안**: test-runner 분대원에게 Jest 테스트 작성 지시.
+- **`/performance-check`** — Lighthouse 점수 측정 + Core Web Vitals (LCP/INP/CLS) 진단·개선. **자기완결 대안**: performance-optimizer 예비병에게 Lighthouse CLI 실행 + 결과 분석 지시.
+
+### 부재 시 행동 원칙
+
+분대장이 임무 분석 결과 어떤 스킬이 필요하다고 판단한 경우:
+
+1. **Skill 도구로 호출 시도** — 설치돼 있으면 즉시 실행
+2. **호출 실패(스킬 미설치)** — 위 "자기완결 대안" 절차를 분대장이 직접 수행
+3. **결과는 동일하게 소대장에게 보고** — 스킬 사용 여부와 무관하게 임무 완수가 목표
+
+이 원칙으로 본 스킬은 **위 18개 스킬이 모두 설치된 환경(PO 사내)에서도, 백호 단독 환경에서도 동일하게 작동**한다.
 
 > **Skill Package는 지속 확장형이다.** 위 목록은 현재 대표 스킬일 뿐, 사용자가 `~/.claude/skills/` 디렉토리에 신규 스킬을 추가하면 소대장·분대장·분대원이 자동으로 인식하여 활용한다. 따라서 본 스킬은 시간이 지날수록 더 강력해진다.
 
@@ -738,18 +785,75 @@ name: 백호-platoon-formation
 
 **코드를 수정하면 반드시 SAL Grid에 기록해야 한다. 예외 없음.**
 
-소대장은 분대 보고 수집 전에 다음을 확인한다:
+> **SAL Grid란 무엇인가? (자기완결 설명)**
+>
+> SAL Grid는 청룡 사신 시리즈의 형제 스킬 `/sal-grid-dev`에서 제공하는 **3차원 좌표계 기반 개발방법론**이다. 코드 한 줄 한 줄을 다음 좌표로 식별·추적한다:
+>
+> - **Stage (S)** — 작업 단계 (`S0` 초기 설계 → `S1` 첫 구현 → `S2` ... → `SN` 배포까지 동적으로 N개 결정)
+> - **Area (A)** — 작업 영역 (예: `A1` 프론트엔드 / `A2` 백엔드 / `A3` DB / `A4` 인프라)
+> - **Level (L)** — 추상화 수준 (예: `L1` 단위 컴포넌트 / `L2` 모듈 / `L3` 서비스)
+> - **Variant** — 동일 좌표 내 변형 식별자 (선택)
+>
+> 각 Task는 `S{n}-A{n}-L{n}` 같은 SAL ID로 식별되며, **모든 코드 작업이 어느 Stage·Area·Level에 속하는지가 사전에 정의**된다. AI 협업 시 "어디서 무엇을 하고 있는지"를 좌표로 명확히 한다.
 
-1. **코드 수정이 있었는가?** → 있으면 SAL Grid 반영 필수
-2. **반영 방법**:
-   - 기존 Task 수정: 해당 grid_records JSON의 task_status 업데이트
-   - 신규 기능 추가: TASK_PLAN.md에 Task 추가 + grid_records JSON 생성
-   - Task 삭제/변경: TASK_PLAN.md + JSON 업데이트/삭제
-3. **검증**: `node scripts/build-progress.js`로 진행률 재계산
-4. **SAL Grid에 반영 없이 코드만 수정한 작업은 미완료로 간주한다**
+### Phase 6.3 실행 전 확인 (선행 조건)
 
-이 규칙은 소대장, 분대장, 서브에이전트 모두에게 적용된다.
-분대장에게 임무 배정 시 "작업 완료 후 SAL Grid 반영 필수"를 지시에 포함한다.
+본 Phase는 **본 프로젝트가 SAL Grid Dev Suite로 구성된 경우에만 실질적으로 적용**된다. 다음 중 하나라도 존재해야 한다:
+
+- 프로젝트 루트 또는 상위에 `SAL_Grid_Dev_Suite/` 폴더
+- 또는 현재 Stage 폴더 내 `grid_records/` 디렉토리 (JSON 파일들)
+- 또는 `TASK_PLAN.md` 파일 (전체 Task 목록)
+
+위 항목이 하나도 없으면 본 프로젝트는 일반 프로젝트로 간주하고, 소대장은 본 Phase를 건너뛰고 Phase 6.5(결과 종합)로 직행한다 — **단, 그 경우에도 일반 변경 이력(git commit, worklog)은 그대로 남긴다**.
+
+### SAL Grid 프로젝트인 경우 — 소대장이 분대 보고 수집 전에 수행할 작업
+
+소대장은 다음을 순서대로 수행한다:
+
+1. **코드 수정이 있었는가?** → 있으면 SAL Grid 반영 필수.
+2. **반영 방법** (수정 유형별):
+
+   | 수정 유형 | 반영 방법 |
+   |---|---|
+   | 기존 Task의 코드 수정 | 해당 Task의 `grid_records/{TaskID}.json` 파일을 열어 `task_status`, `modification_history`, `generated_files` 갱신 |
+   | 신규 기능 추가 | `TASK_PLAN.md`에 새 행 추가 (SAL ID + Task 설명 + 의존성) + `grid_records/{NewTaskID}.json` 새 파일 생성 |
+   | Task 삭제/변경 | `TASK_PLAN.md` 행 삭제·수정 + `grid_records/{TaskID}.json` 업데이트·삭제 + 의존 Task의 `blockedBy` 갱신 |
+   | 버그 수정 | 해당 Task의 `verification_status`를 `re-verify-required`로 재설정 |
+
+3. **grid_records/{TaskID}.json 구조** (참고):
+   ```json
+   {
+     "task_id": "S1-A2-L3",
+     "task_status": "Completed",     // Pending / InProgress / Completed
+     "verification_status": "PASS",  // PASS / FAIL / re-verify-required
+     "generated_files": ["src/components/Login.tsx", "src/api/auth.ts"],
+     "build_verification": {
+       "compile": "PASS",            // tsc/lint
+       "runtime": "PASS"             // 실제 호출·실행 확인
+     },
+     "modification_history": [
+       {"timestamp": "2026-05-30T14:30Z", "agent": "Alpha-squad-leader", "change": "added Zod validation"}
+     ]
+   }
+   ```
+
+4. **글로벌 최소 완료 기준 3가지** — 어느 Task든 `task_status: "Completed"`로 표기하려면 다음 3가지를 모두 만족해야 한다:
+   - **(a) 파일 존재** — 산출물 파일이 생성되었고 `generated_files`에 기록됨
+   - **(b) 빌드 통과** — tsc/lint 에러 없음 (`build_verification.compile = PASS`)
+   - **(c) 실제 호출/실행됨** — 다른 모듈에서 import되거나, API 라우트로 접근 가능하거나, 테스트에서 호출됨 (`build_verification.runtime = PASS`)
+   - 특히 (c)가 핵심이다. **파일만 만들고 아무 데서도 안 쓰이는 코드는 미완료로 간주**한다.
+
+5. **검증** — Grid 반영 후 다음을 수행한다 (스크립트가 존재하는 경우):
+   - `node scripts/build-progress.js` 또는 동등한 진행률 계산 스크립트 → Stage별 진행률 재계산
+   - `viewer_json.html`(Viewer)이 있으면 브라우저로 열어 `index.json` + `grid_records/*.json`이 정상 로드되는지 확인
+
+6. **SAL Grid에 반영 없이 코드만 수정한 작업은 미완료로 간주한다.** 분대 보고 시점에 SAL Grid 반영 누락이 발견되면, 소대장은 해당 분대장에게 SendMessage로 Grid 반영 작업을 추가 지시한 후에야 Phase 6.5로 진행한다.
+
+### 적용 범위
+
+이 규칙은 소대장, 분대장, 서브에이전트 모두에게 적용된다. 분대장에게 임무 배정 시(Phase 1.7) "작업 완료 후 SAL Grid 반영 필수"를 지시에 포함한다.
+
+> **외부 도구 참조**: 본 Phase의 절차는 백호 스킬 본문만으로 수행 가능하다. 다만 청룡 스킬(`/sal-grid-dev`)이 설치되어 있으면 다음 명령으로 자동화·간소화가 가능하다 — `/sal-grid-dev add` (Task 추가), `/sal-grid-dev modify` (Task 수정), `/sal-grid-dev status` (진행률 확인). 청룡 미설치 환경에서는 본 절차를 수동으로 수행한다.
 
 ---
 name: 백호-platoon-formation
@@ -1010,9 +1114,13 @@ name: 백호-platoon-formation
 ### 문제: 용병 CLI가 작동하지 않는다
 - **원인:** 미설치 또는 환경변수 미설정
 - **해결:**
-  - CLI 설치 확인: `which {cli명령어}`
-  - API 키 확인: `echo $API_KEY_NAME`
-  - 설치: 공식 문서 참조
+  - CLI 설치 확인: `which {cli명령어}` (Windows PowerShell은 `Get-Command {cli명령어}`)
+  - API 키 확인: `echo $API_KEY_NAME` (Windows PowerShell은 `$env:API_KEY_NAME`)
+  - 설치 가이드:
+    - **Codex CLI**: https://github.com/openai/codex (npm install -g @openai/codex-cli, 환경변수 `OPENAI_API_KEY`)
+    - **Gemini CLI**: https://github.com/google-gemini/gemini-cli (npm install -g @google/gemini-cli, 환경변수 `GEMINI_API_KEY` 또는 OAuth)
+    - **Grok CLI**: https://docs.x.ai/docs (CLI 또는 API, 환경변수 `XAI_API_KEY`)
+    - **Perplexity MCP**: MCP 서버로 호출 — Claude Code MCP 설정에 `perplexity` 등록 후 사용 (https://docs.perplexity.ai/)
 
 ### 문제: 작업이 무한 대기 상태다
 - **원인:** TaskUpdate 누락 또는 blockedBy 미해결
