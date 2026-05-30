@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platoon Formation 특허 — 군 소대 편제 기반 다중 AI 에이전트 조율 시스템</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #1e293b;
+      --muted: #475569;
+      --accent: #2563eb;
+      --accent2: #7c3aed;
+      --accent3: #059669;
+      --warn: #d97706;
+      --code-bg: #f1f5f9;
+      --slide-max-w: 1100px;
+      --border: rgba(100,116,139,0.15);
+      --hl-accent: rgba(37,99,235,0.08);
+      --hl-warn: rgba(217,119,6,0.08);
+      --hl-green: rgba(5,150,105,0.08);
+      --hl-purple: rgba(124,58,237,0.08);
+      --hover-bg: rgba(37,99,235,0.05);
+    }
+    :root.dark {
+      --bg: #002451;
+      --surface: #00346e;
+      --text: #ffffff;
+      --muted: #7285b7;
+      --accent: #bbdaff;
+      --accent2: #ebbbff;
+      --accent3: #d1f1a9;
+      --warn: #ffeead;
+      --code-bg: #003f8e;
+      --border: rgba(187,218,255,0.15);
+      --hl-accent: rgba(187,218,255,0.08);
+      --hl-warn: rgba(255,238,173,0.08);
+      --hl-green: rgba(209,241,169,0.08);
+      --hl-purple: rgba(235,187,255,0.08);
+      --hover-bg: rgba(187,218,255,0.08);
+    }
+
+    body { background: var(--bg); color: var(--text); }
+
+    .progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); z-index: 100; transition: width 0.3s ease; }
+
+    .slides { position: relative; width: 100%; height: 100vh; }
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 60px 48px 80px;
+      opacity: 0; transform: translateX(60px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+      pointer-events: none;
+      overflow-y: auto;
+    }
+    .slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+    .slide.prev { opacity: 0; transform: translateX(-60px); }
+    .slide-inner { max-width: var(--slide-max-w); width: 100%; }
+
+    .slide h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; margin-bottom: 24px; line-height: 1.35; color: var(--accent); }
+    .slide h2 .accent { color: var(--accent); }
+    .slide h2 .accent2 { color: var(--accent2); }
+    .slide h2 .accent3 { color: var(--accent3); }
+    .slide h2 .text { color: var(--text); }
+    .slide h3 { font-size: 1.1rem; color: var(--accent2); margin: 16px 0 10px; font-weight: 700; }
+    .slide p { font-size: 1.05rem; line-height: 1.85; color: var(--text); margin-bottom: 14px; }
+    .slide ul, .slide ol { font-size: 1.05rem; line-height: 1.9; padding-left: 24px; color: var(--text); }
+    .slide li { margin-bottom: 8px; }
+    .slide li::marker { color: var(--accent); }
+    .slide strong { color: var(--accent); font-weight: 700; }
+    .slide em strong { color: var(--accent2); }
+    .slide code { background: var(--code-bg); padding: 2px 8px; border-radius: 4px; font-size: 0.92em; color: var(--text); font-weight: 600; }
+    .slide pre { background: var(--code-bg); border-radius: 12px; padding: 18px 22px; overflow-x: auto; margin: 14px 0; font-size: 0.88rem; line-height: 1.6; border: 1px solid var(--border); }
+    .slide pre code { font-weight: 400; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 14px 0; position: relative; }
+    .table-wrap::after { content: '→ 스크롤'; position: absolute; top: 8px; right: 8px; font-size: 0.75rem; color: var(--muted); opacity: 0.6; display: none; }
+    @media (max-width: 768px) { .table-wrap::after { display: block; } }
+    .slide table { width: 100%; border-collapse: collapse; font-size: 1rem; min-width: 600px; }
+    .slide th { background: var(--surface); padding: 10px 14px; text-align: left; font-weight: 700; color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .slide td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .slide tr:hover td { background: var(--hover-bg); }
+
+    .slide.title-slide { text-align: center; }
+    .slide.title-slide h1 { font-size: clamp(1.5rem, 3.5vw, 2.6rem); font-weight: 900; line-height: 1.5; margin-bottom: 28px; color: var(--accent); }
+    .slide.title-slide .subtitle { font-size: 1.15rem; color: var(--accent2); margin-bottom: 20px; font-weight: 600; }
+    .slide.title-slide .date { font-size: 0.95rem; color: var(--muted); }
+
+    .slide.end-slide { text-align: center; }
+    .section-label { display: inline-block; font-size: 0.78rem; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 6px; }
+
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+    .card { background: var(--surface); border-radius: 12px; padding: 18px 20px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .card .label { font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; }
+    .card .value { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+    .card .desc { font-size: 0.95rem; color: var(--text); margin-top: 6px; line-height: 1.6; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; gap: 16px; } }
+
+    .highlight { background: var(--hl-accent); border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 0 12px 12px 0; margin: 14px 0; font-size: 1rem; line-height: 1.7; color: var(--text); }
+    .highlight.warn { border-left-color: var(--warn); background: var(--hl-warn); }
+    .highlight.green { border-left-color: var(--accent3); background: var(--hl-green); }
+    .highlight.purple { border-left-color: var(--accent2); background: var(--hl-purple); }
+
+    .vs-box { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin: 16px 0; }
+    .vs-box .side { background: var(--surface); padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border); }
+    .vs-box .vs { font-size: 1.5rem; font-weight: 900; color: var(--warn); }
+    @media (max-width: 768px) { .vs-box { grid-template-columns: 1fr; } .vs-box .vs { text-align: center; padding: 4px 0; } }
+
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; justify-content: center; gap: 20px; z-index: 100; }
+    .nav-btn { background: none; border: 2px solid var(--accent); color: var(--accent); padding: 6px 24px; border-radius: 20px; cursor: pointer; font-size: 15px; font-weight: 700; transition: all 0.2s; font-family: inherit; }
+    .nav-btn:hover { background: var(--accent); color: var(--bg); }
+    .nav-btn:disabled { border-color: var(--border); color: var(--muted); opacity: 0.4; cursor: default; background: none; }
+    .counter { color: var(--muted); font-size: 15px; min-width: 70px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .theme-toggle { position: fixed; top: 12px; right: 12px; z-index: 100; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+    .fs-toggle { position: fixed; top: 12px; right: 80px; z-index: 100; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+
+    @media print {
+      .nav-bar, .progress, .theme-toggle, .fs-toggle { display: none !important; }
+      .slides { position: static; height: auto; }
+      .slide { position: static; opacity: 1 !important; transform: none !important; pointer-events: auto !important; page-break-after: always; height: 100vh; padding: 40px; }
+      .slide:last-child { page-break-after: avoid; }
+    }
+    @media (max-width: 768px) {
+      .slide { padding: 48px 18px 68px; }
+      .card-grid { grid-template-columns: 1fr !important; }
+      .toc-grid { grid-template-columns: 1fr !important; }
+      .toc-left { border-right: none !important; padding-right: 0 !important; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
+      .toc-right { padding-left: 0 !important; }
+      .slide h2 { font-size: 1.3rem; margin-bottom: 16px; }
+      .slide h3 { font-size: 1rem; }
+      .slide p, .slide ul, .slide ol { font-size: 0.95rem; line-height: 1.75; }
+      .slide li { margin-bottom: 5px; }
+      .slide pre { font-size: 0.75rem; padding: 14px 16px; }
+      .highlight { padding: 12px 14px; font-size: 0.92rem; }
+      .nav-bar { padding: 8px 12px; gap: 12px; }
+      .nav-btn { padding: 5px 16px; font-size: 13px; }
+      .counter { font-size: 13px; min-width: 56px; }
+      .theme-toggle, .fs-toggle { font-size: 11px; padding: 4px 8px; }
+      .fs-toggle { right: 64px; }
+      .mini-grid { font-size: 0.7rem; }
+      .mini-grid th { font-size: 0.65rem; padding: 4px 4px; }
+      .mini-grid td { font-size: 0.68rem; padding: 4px 4px; }
+      .slide.title-slide h1 { font-size: 1.3rem; line-height: 1.5; }
+      .slide.title-slide .subtitle { font-size: 1rem; }
+      .vs-box .side { padding: 12px 14px; }
+      .vs-box .side ul { font-size: 0.88rem !important; }
+      .card .value { font-size: 1.2rem; }
+      .card .desc { font-size: 0.88rem; }
+      .card { padding: 14px 16px; }
+    }
+    @media (max-width: 380px) {
+      .slide { padding: 44px 14px 64px; }
+      .slide h2 { font-size: 1.15rem; }
+      .slide p, .slide ul, .slide ol { font-size: 0.88rem; }
+      .slide pre { font-size: 0.68rem; padding: 10px 12px; }
+      .mini-grid th { font-size: 0.58rem; padding: 3px 2px; }
+      .mini-grid td { font-size: 0.6rem; padding: 3px 2px; }
+      .nav-btn { padding: 4px 12px; font-size: 12px; }
+      .slide.title-slide h1 { font-size: 1.1rem; }
+    }
+
+    .mini-grid { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: auto; margin: 12px 0; }
+    .mini-grid th { padding: 6px 8px; font-size: 0.78rem; background: var(--surface); border-bottom: 2px solid var(--accent); }
+    .mini-grid td { padding: 5px 8px; text-align: center; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+    .mini-grid .done { color: var(--accent3); font-weight: 700; }
+    .mini-grid .prog { color: var(--warn); font-weight: 700; }
+    .mini-grid .area-label { text-align: left; font-weight: 700; color: var(--accent2); }
+
+    .org-chart { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 16px 0; }
+    .org-row { display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .org-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 10px; padding: 10px 18px; font-weight: 700; font-size: 0.92rem; text-align: center; min-width: 120px; }
+    .org-box.hq { border-color: var(--accent); color: var(--accent); }
+    .org-box.squad { border-color: var(--accent2); color: var(--accent2); font-size: 0.85rem; }
+    .org-box.merc { border-color: var(--warn); color: var(--warn); font-size: 0.85rem; border-style: dashed; }
+    .org-box.tool { border-color: var(--accent3); color: var(--accent3); font-size: 0.85rem; }
+    .org-line { width: 2px; height: 16px; background: var(--accent); }
+    .org-hline { height: 2px; background: var(--accent2); flex: 1; min-width: 30px; max-width: 120px; }
+  </style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<button class="fs-toggle" id="fsToggle" title="전체화면 (F)" aria-label="전체화면 토글">⛶</button>
+<button class="theme-toggle" id="themeToggle" aria-label="테마 전환">Light</button>
+
+<div class="slides" id="slides">
+
+  <!-- ===== 1. 타이틀 ===== -->
+  <div class="slide title-slide active">
+    <div class="slide-inner">
+      <h1>군 소대 편제를 응용한<br>계층적 다중 AI 에이전트<br>작업팀 편성·운용 시스템 및 방법</h1>
+      <div class="subtitle">특허 출원 기술 소개</div>
+      <div class="date">출원번호 10-2026-0041235 · 출원일 2026.03.07</div>
+    </div>
+  </div>
+
+  <!-- ===== 2. 목차 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">목차</span></h2>
+      <div class="toc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:8px;">
+        <div class="toc-left" style="border-right:1px solid var(--border);padding-right:24px;">
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:1.3rem;font-weight:800;color:var(--accent);min-width:32px;">01</span>
+            <span style="font-size:1.05rem;flex:1;">왜 필요한가 — 기존 기술의 한계</span>
+            <span style="font-size:0.82rem;color:var(--muted);">p.3</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:1.3rem;font-weight:800;color:var(--accent);min-width:32px;">02</span>
+            <span style="font-size:1.05rem;flex:1;">무엇이 다른가 — 소대 편제 발상</span>
+            <span style="font-size:0.82rem;color:var(--muted);">p.5</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:1.3rem;font-weight:800;color:var(--accent);min-width:32px;">03</span>
+            <span style="font-size:1.05rem;flex:1;">어떻게 편성되는가 — 편성 공식과 계층</span>
+            <span style="font-size:0.82rem;color:var(--muted);">p.8</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;">
+            <span style="font-size:1.3rem;font-weight:800;color:var(--accent);min-width:32px;">04</span>
+            <span style="font-size:1.05rem;flex:1;">왜 저렴한가 — 이중 비용 절감</span>
+            <span style="font-size:0.82rem;color:var(--muted);">p.12</span>
+          </div>
+        </div>
+        <div class="toc-right" style="padding-left:24px;">
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:1.3rem;font-weight:800;color:var(--accent2);min-width:32px;">05</span>
+            <span style="font-size:1.05rem;flex:1;">어떻게 돌아가는가 — 운용 프로세스</span>
+            <span style="font-size:0.82rem;color:var(--muted);">p.16</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:1.3rem;font-weight:800;color:var(--accent2);min-width:32px;">06</span>
+            <span style="font-size:1.05rem;flex:1;">정말 다른가 — 선행기술 비교</span>
+            <span style="font-size:0.82rem;color:var(--muted);">p.19</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;">
+            <span style="font-size:1.3rem;font-weight:800;color:var(--accent2);min-width:32px;">07</span>
+            <span style="font-size:1.05rem;flex:1;">확장과 기대 효과</span>
+            <span style="font-size:0.82rem;color:var(--muted);">p.21</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PART 1: 왜 필요한가 — 문제 제기 (2장)          -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- ===== 3. 기존 기술의 한계 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="section-label">PART 01 — 왜 필요한가</div>
+      <h2><span class="text">기존 멀티에이전트 시스템의</span> 5가지 한계</h2>
+      <div class="card-grid" style="grid-template-columns: 1fr;">
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--warn)">한계 ① 편성 원리가 없다</div>
+          <div class="desc">에이전트 수, 팀 구조, 역할 배분에 대한 체계적 원리가 없어 프로젝트마다 임의로 구성. 재현성과 예측 가능성이 부족하다.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--warn)">한계 ② 조율 복잡도가 O(n²)으로 폭증</div>
+          <div class="desc">에이전트 45개면 통신 경로 <strong style="color:var(--warn)">990개</strong>. 100개면 4,950개. 에이전트를 늘릴수록 시스템이 제곱으로 복잡해진다.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--warn)">한계 ③ 전원 동일 모델 = 비용 폭탄</div>
+          <div class="desc">역할 구분이 없으므로 모든 에이전트에 최고급 AI 모델 배치. 단순 작업에도 고급 모델 비용이 발생한다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4. 한계 ④⑤ + 본질 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">구조적 한계 ④⑤ +</span> 문제의 본질</h2>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--warn)">한계 ④ 이종 AI 통합 불가</div>
+          <div class="desc">단일 AI 플랫폼 내에서만 동작. 타사 AI의 특화 기능을 활용할 수 없다.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--warn)">한계 ⑤ 복수 팀 관제 부재</div>
+          <div class="desc">여러 에이전트 팀을 동시 운용할 때 통합 관제 체계가 없어 각 팀을 개별 관리해야 한다.</div>
+        </div>
+      </div>
+      <div class="highlight purple" style="margin-top:18px;">
+        모든 기존 시스템의 공통점: <strong>"에이전트를 평면(flat)으로 나열"</strong>한다.<br>
+        평면 구조에서는 에이전트가 늘어날수록 모든 문제가 제곱으로 악화된다.<br>
+        이 전제를 깨지 않는 한, 어떤 최적화도 O(n²)의 벽을 넘지 못한다.
+      </div>
+      <p style="margin-top:12px"><strong style="color:var(--accent)">Platoon Formation은 이 전제 자체를 뒤집는다.</strong></p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PART 2: 무엇이 다른가 — 핵심 발상 (3장)        -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- ===== 5. 핵심 발상 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="section-label">PART 02 — 무엇이 다른가</div>
+      <h2><span class="text">핵심 발상 —</span> 군 소대 편제를 AI에 적용</h2>
+      <p>전 세계 군대가 수백 년간 전장에서 검증한 <strong>소대(Platoon) 편제</strong> — 그 조직 원리를 AI 에이전트 조율에 이식한다.</p>
+      <div class="card-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent)">지휘 계층</div>
+          <div class="desc">소대장 → 분대장 → 분대원<br>= 오케스트레이터 → 매니저 → 워커</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent2)">3개 분대 편성</div>
+          <div class="desc">미국·한국·독일·프랑스·일본 군대 모두 소대 내 <strong style="color:var(--accent2)">3개 분대</strong>를 기본 단위로 채택.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent3)">병렬 작전</div>
+          <div class="desc">각 분대가 독립적으로 병렬 임무 수행. 분대 간에는 수평 교신으로 정보 공유.</div>
+        </div>
+      </div>
+      <div class="highlight green">
+        Anthropic 공식 문서도 "Three focused teammates often outperform five scattered ones"이라고 명시. <strong>인간 조직이든 AI 조직이든, 3개 하위 팀이 최적</strong>이라는 조직론의 보편 원리.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 편제 비유 대응표 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">군 편제 ↔ AI 시스템</span> 대응표</h2>
+      <p>군사 비유의 각 개념이 AI 시스템에서 어떤 역할과 대응하는지 한눈에 정리한다.</p>
+      <div class="table-wrap">
+        <table class="mini-grid">
+          <tr><th style="text-align:left;width:18%">군 편제 용어</th><th style="text-align:left;width:22%">AI 시스템 역할</th><th style="text-align:left;width:18%">Claude Code 용어</th><th style="text-align:left">설명</th></tr>
+          <tr><td class="area-label">지휘관</td><td><strong>사용자 (인간)</strong></td><td>User</td><td>유일한 인간. 임무 부여·승인·해산 결정</td></tr>
+          <tr><td class="area-label">소대장</td><td><strong>Orchestrator AI</strong></td><td>Team Leader</td><td>Opus급. 작업 분해, 배정, 결과 종합</td></tr>
+          <tr><td class="area-label">연락병</td><td><strong>UI 인터페이스</strong></td><td>—</td><td>지휘관과 소대 사이 통신 모듈</td></tr>
+          <tr><td class="area-label">분대장</td><td><strong>Manager AI</strong></td><td>Teammate</td><td>Sonnet급. 분대원 지휘, 결과 취합</td></tr>
+          <tr><td class="area-label">분대원</td><td><strong>Worker AI</strong></td><td>Subagent</td><td>Haiku급 기본 (복잡 작업 시 Sonnet급 전환). 실무 수행 12종</td></tr>
+          <tr><td class="area-label">용병</td><td><strong>외부 AI</strong></td><td>—</td><td>Codex·Gemini·Grok·Perplexity</td></tr>
+          <tr><td class="area-label">무기</td><td><strong>기능 모듈</strong></td><td>Skill</td><td>에이전트가 자율 선택·장착하는 도구</td></tr>
+          <tr><td class="area-label">작전 통제소</td><td><strong>통합 관제 모듈</strong></td><td>—</td><td>복수 소대 관제, DB+UI</td></tr>
+        </table>
+      </div>
+      <div class="highlight">
+        군사 비유를 사용하되 <strong>모든 역할은 AI 에이전트</strong>(또는 소프트웨어 모듈)이며, 실제 군사 활동과는 무관하다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 6. 편제 구조도 (아키텍처 다이어그램) ===== -->
+  <div class="slide">
+    <div class="slide-inner" style="text-align:center;">
+      <h2><span class="text">편제 구조 —</span> 전원이 AI 에이전트</h2>
+      <p style="margin-bottom:16px;">소대를 구성하는 <strong>소대장, 분대장, 분대원, 용병 모두 AI 에이전트</strong>이다. 유일한 인간은 이 소대를 지휘하는 <strong style="color:var(--accent2)">지휘관(사용자)</strong> 1명뿐.</p>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <img src="platoon_formation_v3.svg" alt="Platoon Formation Architecture" style="max-width:100%;height:auto;border-radius:12px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+      </div>
+      <p style="font-size:0.88rem;color:var(--muted);margin-top:12px;">지휘관(PO) → CPC → 연락병 → 소대장 → 3개 분대(Alpha/Bravo/Charlie) + 용병 4 + Skills 21</p>
+    </div>
+  </div>
+
+  <!-- ===== 7. VS 비교 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">평면 구조</span> VS <span class="accent">소대 편제</span></h2>
+      <div class="vs-box">
+        <div class="side">
+          <h3 style="color:var(--warn)">기존: 평면 구조</h3>
+          <ul style="font-size:0.95rem">
+            <li>45개 에이전트가 모두 <strong style="color:var(--warn)">상호 통신</strong></li>
+            <li>통신 경로 <strong style="color:var(--warn)">990개</strong></li>
+            <li>전원 고급 모델 = 비용 <strong style="color:var(--warn)">100%</strong></li>
+            <li>확장 시 매번 재설계</li>
+            <li>사용자 수시 개입</li>
+          </ul>
+        </div>
+        <div class="vs">VS</div>
+        <div class="side">
+          <h3 style="color:var(--accent)">본 발명: 소대 편제</h3>
+          <ul style="font-size:0.95rem">
+            <li>계층적 통신 — 직속 <strong>상·하위만</strong> 소통</li>
+            <li>통신 경로 <strong>48개</strong> (95.2% 감소)</li>
+            <li>동적 모델 배치 = 비용 <strong>약 5%</strong> (95% 절감)</li>
+            <li>소대 복제만으로 무한 확장</li>
+            <li>사용자 개입 <strong>3회 이내</strong></li>
+          </ul>
+        </div>
+      </div>
+      <div class="highlight">
+        에이전트를 "더 잘 나열"한 것이 아니다. <strong>평면 구조를 계층 구조로 치환</strong>하여 조율 복잡도의 차수(order) 자체를 바꾼 것이다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PART 3: 어떻게 편성되는가 — 편성 공식 (3장)     -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- ===== 8. 편성 공식 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="section-label">PART 03 — 어떻게 편성되는가</div>
+      <h2><span class="text">편성 공식 —</span> 예측 가능한 팀 구성</h2>
+      <pre><code>작업팀 총원 = P + N × (1 + M) + K
+
+  P = 본부 정원 (소대장 + 연락병)
+  N = 분대 수 (지휘관 결정, 기본 3~5)
+  M = 분대당 분대원 수 (도메인에 따라 구성)
+  K = 용병 수 (외부 AI, 임무에 따라 가변)</code></pre>
+      <div class="card-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="card" style="text-align:center;">
+          <div class="label">P (본부)</div>
+          <div class="value">2</div>
+          <div class="desc">소대장 1 + 연락병 1</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="label">N (분대)</div>
+          <div class="value" style="color:var(--accent2)">3</div>
+          <div class="desc">Alpha · Bravo · Charlie</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="label">M (분대원)</div>
+          <div class="value" style="color:var(--accent3)">12</div>
+          <div class="desc">12종 표준 역할</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="label">K (용병)</div>
+          <div class="value" style="color:var(--warn)">4</div>
+          <div class="desc">4종 이종 AI</div>
+        </div>
+      </div>
+      <div class="highlight purple">
+        종래 기술은 "몇 명을 넣을까?"를 매번 임의로 결정한다. 본 발명은 <strong>공식에 변수를 대입</strong>하면 편성이 확정되므로, 프로젝트 규모와 무관하게 일관되고 예측 가능한 팀이 구성된다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 9. 3계층 모델 배치 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">3계층</span> 동적 모델 배치</h2>
+      <p>소대장이 분대별 임무의 <strong>성격·난이도·비용</strong>을 종합 판단하여 최적 등급의 AI 모델을 선정한다.</p>
+      <div class="card-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent)">제1계층: 소대장</div>
+          <div class="desc"><strong>고급 모델</strong> (Opus급)<br>전체 오케스트레이션, 전략 의사결정<br><span style="color:var(--muted);font-size:0.88rem">1개 에이전트</span></div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent2)">제2계층: 분대장</div>
+          <div class="desc"><strong>중급 모델</strong> (Sonnet급)<br>임무 분해, 분대원 투입 판단<br><span style="color:var(--muted);font-size:0.88rem">3개 에이전트 (소대장이 등급 선정)</span></div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent3)">제3계층: 분대원</div>
+          <div class="desc"><strong>경량 모델</strong> (Haiku급)<br>구체적 실무 작업 수행<br><span style="color:var(--muted);font-size:0.88rem">36개 에이전트 (복잡 작업 시 중급 전환)</span></div>
+        </div>
+      </div>
+      <div class="highlight warn">
+        고급 모델의 출력 토큰 단가는 경량 모델 대비 <strong>약 60배</strong>. 계층에 맞게 모델을 배치하면 동일 작업을 <strong>기존 비용의 약 5%</strong>로 수행할 수 있다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 10. 분대원 11종 역할 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">분대원 에이전트</span> 12종 표준 역할</h2>
+      <p>소프트웨어 개발 도메인에서의 바람직한 실시예. 분대당 <strong style="color:var(--accent2)">M = 12개</strong>의 표준화된 역할.</p>
+      <div class="card-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent)">프론트엔드 개발자</div><div class="desc" style="font-size:0.85rem">UI 개발 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent)">백엔드 개발자</div><div class="desc" style="font-size:0.85rem">API/서버 로직 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent)">DB 개발자</div><div class="desc" style="font-size:0.85rem">스키마/쿼리 최적화 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent2)">UX/UI 디자이너</div><div class="desc" style="font-size:0.85rem">UI/UX 디자인 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent2)">API 테스터</div><div class="desc" style="font-size:0.85rem">엔드포인트 검증 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent2)">코드 리뷰어</div><div class="desc" style="font-size:0.85rem">품질 검증 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent3)">테스트 실행자</div><div class="desc" style="font-size:0.85rem">테스트 자동화 (경량)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--accent3)">디버거/트러블슈터</div><div class="desc" style="font-size:0.85rem">문제 해결 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--warn)">보안 전문가</div><div class="desc" style="font-size:0.85rem">취약점 분석 (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--warn)">문서 작성자</div><div class="desc" style="font-size:0.85rem">문서/가이드 (경량)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--warn)">데브옵스 전문가</div><div class="desc" style="font-size:0.85rem">배포/CI-CD (중급)</div></div>
+        <div class="card"><div class="value" style="font-size:0.92rem;color:var(--warn)">콘텐츠 전문가</div><div class="desc" style="font-size:0.85rem">카피/콘텐츠 (경량)</div></div>
+      </div>
+      <p style="font-size:0.92rem;color:var(--muted);margin-top:8px;">※ 역할 유형과 수(M)는 도메인에 따라 자유롭게 구성 가능 (데이터 분석, 콘텐츠 제작 등)</p>
+    </div>
+  </div>
+
+  <!-- ===== 용병(외부 AI) 풀 상세 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">용병 풀 (500) —</span> <span class="accent2">게이트웨이 구조</span></h2>
+      <p>외부 AI는 개별 에이전트가 직접 호출하지 않고, <strong>풀 모듈(500)이 단일 게이트웨이</strong> 역할을 한다. 소대장과 분대장만 게이트웨이를 통해 호출한다.</p>
+      <div class="card-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="card" style="text-align:center;">
+          <div class="value" style="font-size:1rem;color:var(--accent)">Codex (510)</div>
+          <div class="desc"><strong>CLI</strong> 호출<br>코드 생성 특화</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="value" style="font-size:1rem;color:var(--accent2)">Gemini (520)</div>
+          <div class="desc"><strong>CLI</strong> 호출<br>멀티모달 분석</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="value" style="font-size:1rem;color:var(--accent3)">Grok (530)</div>
+          <div class="desc"><strong>CLI</strong> 호출<br>실시간 정보</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="value" style="font-size:1rem;color:var(--warn)">Perplexity (540)</div>
+          <div class="desc"><strong>MCP</strong> 호출<br>검색 특화</div>
+        </div>
+      </div>
+      <div class="highlight purple">
+        <strong>연동 경로: 호출자(1+N) + 용병(K) = (1+3)+4 = 8개</strong><br>
+        종래: 내부 에이전트 41개(=총원 45−용병 4) × 용병 4종 = 164개 (모두가 각각 연동)<br>
+        본 발명: 호출자 4명(소대장 1+분대장 3) → 게이트웨이 1개 → 용병 4종 = <strong>8개</strong> → 95.1% 감소
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PART 4: 왜 저렴한가 — 이중 비용 절감 (3장)      -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- ===== 11. 제1절감: 통신 경로 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="section-label">PART 04 — 왜 저렴한가</div>
+      <h2><span class="text">제1절감:</span> 통신 경로 O(n²) → O(n)</h2>
+      <p>평면 구조에서는 n개 에이전트가 모두 상호 통신하므로 <code>n(n-1)/2</code>개의 경로가 필요하다. 소대 편제는 <strong>직속 상·하위만 통신</strong>하므로 경로가 선형이다.</p>
+      <div class="table-wrap">
+        <table class="mini-grid">
+          <tr><th style="text-align:left">규모</th><th>평면 구조</th><th>소대 편제</th><th>감소율</th><th>개선 배수</th></tr>
+          <tr><td class="area-label">45개 (1소대)</td><td>990</td><td class="done">48</td><td class="done">95.2%</td><td class="done">21배</td></tr>
+          <tr><td class="area-label">100개</td><td>4,950</td><td class="done">103</td><td class="done">97.9%</td><td class="done">48배</td></tr>
+          <tr><td class="area-label">450개 (10소대)</td><td>101,025</td><td class="done">453</td><td class="done">99.6%</td><td class="done">223배</td></tr>
+          <tr><td class="area-label">4,500개 (100소대)</td><td>10,122,750</td><td class="done">4,503</td><td class="done">99.96%</td><td class="done">2,248배</td></tr>
+        </table>
+      </div>
+      <div class="highlight green">
+        통신 경로 감소는 <strong>토큰 소비량, API 호출 비용, 처리 시간, 컨텍스트 오염</strong>을 동시에 O(n)으로 저감시킨다. 규모가 클수록 효과가 가속적으로 증대.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 12. 제2절감: 모델 배치 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">제2절감:</span> 동적 모델 등급 배치</h2>
+      <p>종래 구조는 역할 구분이 없으므로 45개 <strong style="color:var(--warn)">전원에 고급 모델</strong>을 배치해야 한다. 본 발명은 계층별 임무 난이도에 맞춰 모델을 배치한다.</p>
+      <p style="font-size:0.9rem;color:var(--muted);margin-bottom:14px;">※ 아래는 <strong style="color:var(--accent2)">Claude (Anthropic)</strong>를 사례로 제시한 것이며, 모델 등급 체계는 다른 AI 제공자에도 동일하게 적용 가능.</p>
+      <div class="vs-box">
+        <div class="side">
+          <h3 style="color:var(--warn)">종래 (전원 Opus)</h3>
+          <ul style="font-size:0.95rem">
+            <li>45개 × 고급 단가</li>
+            <li>= 기준 비용 <strong style="color:var(--warn)">100%</strong></li>
+          </ul>
+        </div>
+        <div class="vs">VS</div>
+        <div class="side">
+          <h3 style="color:var(--accent)">본 발명 (동적 배치)</h3>
+          <ul style="font-size:0.95rem">
+            <li>Opus 1 + Sonnet 3 + Haiku 36</li>
+            <li>= 기준 비용의 <strong>약 5%</strong></li>
+          </ul>
+        </div>
+      </div>
+      <div class="highlight" style="text-align:center;">
+        모델 배치만으로 <strong>약 95%</strong> 비용 절감
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 13. 이중 절감 결합 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">이중 비용 절감 —</span> 곱셈적 결합</h2>
+      <p>두 절감 메커니즘은 독립적으로 작용하면서 <strong style="color:var(--accent2)">곱셈적으로 결합</strong>된다.</p>
+      <div class="two-col">
+        <div>
+          <h3 style="color:var(--accent)">제1절감: 통신량 감소</h3>
+          <ul>
+            <li>O(n²) → O(n) 통신 경로</li>
+            <li>45개 기준 <strong>95.2%</strong> 절감</li>
+            <li>토큰 소비 · API 비용 · 처리 시간 동시 감소</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color:var(--accent2)">제2절감: 토큰 단가 감소</h3>
+          <ul>
+            <li>고급 → 중급 → 경량 동적 배치</li>
+            <li>45개 기준 <strong>약 95%</strong> 절감</li>
+            <li>동일 작업 품질, 약 1/19 비용</li>
+          </ul>
+        </div>
+      </div>
+      <div class="highlight purple" style="text-align:center;margin-top:14px;">
+        <strong>통신량이 감소한 상태에서, 그 감소된 통신마저도 저단가 모델로 처리</strong><br>
+        → 총 비용 = 개별 절감율의 단순 합산을 초과하는 수준으로 절감<br>
+        → 규모가 확대될수록 효과가 <strong>가속적으로</strong> 증대
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PART 5: 어떻게 돌아가는가 — 운용 프로세스 (3장) -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- ===== 14. 운용 프로세스 전체 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="section-label">PART 05 — 어떻게 돌아가는가</div>
+      <h2><span class="text">운용 프로세스 —</span> 사용자 개입 3회</h2>
+      <p>사용자 개입은 <strong style="color:var(--accent2)">딱 3회</strong>. 나머지 전 과정을 AI가 자율 수행한다.</p>
+      <div class="card-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="card"><div class="value" style="font-size:0.95rem;color:var(--accent)">S10 소대 편성</div><div class="desc">소대장이 N개 분대장 병렬 생성</div></div>
+        <div class="card" style="border-color:var(--accent2);border-width:2px;"><div class="value" style="font-size:0.95rem;color:var(--accent2)">S15 임무 부여 — 개입 ①</div><div class="desc">사용자가 전체 임무, 분대 수 결정</div></div>
+        <div class="card"><div class="value" style="font-size:0.95rem;color:var(--accent)">S17 작업 분해</div><div class="desc">소대장이 업무+모델+권한 통합 배정</div></div>
+        <div class="card"><div class="value" style="font-size:0.95rem;color:var(--accent)">S20~S50 준비</div><div class="desc">외부AI 전략, 기능모듈 장착, 준비 보고</div></div>
+        <div class="card" style="border-color:var(--accent2);border-width:2px;"><div class="value" style="font-size:0.95rem;color:var(--accent2)">S60 작전 개시 — 개입 ②</div><div class="desc">사용자가 1회 승인 후 자율 수행</div></div>
+        <div class="card"><div class="value" style="font-size:0.95rem;color:var(--accent)">S70 임무 수행</div><div class="desc">N개 분대 병렬 실행 + 결과 보고</div></div>
+        <div class="card"><div class="value" style="font-size:0.95rem;color:var(--accent)">S75 결과 종합</div><div class="desc">소대장이 전 분대 결과 취합 보고</div></div>
+        <div class="card" style="border-color:var(--accent2);border-width:2px;"><div class="value" style="font-size:0.95rem;color:var(--accent2)">S80 해산 승인 — 개입 ③</div><div class="desc">해산 또는 추가 임무 (S60 회귀)</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 15. 통신 구조 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">통신 구조 —</span> 4가지 통신 경로</h2>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent)">① 수직 통신 (상·하향)</div>
+          <div class="desc">소대장 ↔ 분대장 ↔ 분대원<br>직속 상·하위 간에만 통신. 타 분대 정보 유입 차단 → <strong>컨텍스트 오염 방지</strong></div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent2)">② 수평 교신</div>
+          <div class="desc">분대장 ↔ 분대장<br>인접 분대 간 정보 공유. 충돌 방지와 협업에 활용.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent3)">③ 통신 중개</div>
+          <div class="desc">사용자 ↔ 연락병 ↔ 소대장<br>웹 UI를 통한 원격 지휘 채널.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--warn)">④ 외부 호출</div>
+          <div class="desc">소대장/분대장 → 용병 풀<br>이종 AI를 공유 자산으로 호출. 연동 경로 K개로 고정.</div>
+        </div>
+      </div>
+      <!-- 통신 경로 시각화 다이어그램 -->
+      <div style="margin:18px 0;padding:20px;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+        <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;margin:0 auto;display:block;">
+          <defs>
+            <marker id="arr-comm" markerWidth="7" markerHeight="7" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 L1.5,3.5 Z" fill="currentColor"/></marker>
+          </defs>
+          <!-- 지휘관 -->
+          <rect x="280" y="5" width="140" height="32" rx="16" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <text x="350" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--accent)">지휘관(사용자)</text>
+          <!-- 연락병 -->
+          <rect x="500" y="5" width="100" height="32" rx="5" fill="none" stroke="var(--accent3)" stroke-width="1.5"/>
+          <text x="550" y="26" text-anchor="middle" font-size="11" fill="var(--accent3)">연락병 (120)</text>
+          <line x1="420" y1="21" x2="500" y2="21" stroke="var(--accent3)" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="460" y="15" text-anchor="middle" font-size="9" fill="var(--muted)">③ 통신 중개</text>
+          <!-- 소대장 -->
+          <rect x="280" y="55" width="140" height="32" rx="5" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <text x="350" y="76" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--accent)">소대장 (110)</text>
+          <line x1="350" y1="37" x2="350" y2="55" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-comm)"/>
+          <!-- 분대장 3개 -->
+          <rect x="50" y="110" width="130" height="28" rx="5" fill="none" stroke="var(--accent2)" stroke-width="1.5"/>
+          <text x="115" y="129" text-anchor="middle" font-size="11" fill="var(--accent2)">제1분대장 (210)</text>
+          <rect x="280" y="110" width="130" height="28" rx="5" fill="none" stroke="var(--accent2)" stroke-width="1.5"/>
+          <text x="345" y="129" text-anchor="middle" font-size="11" fill="var(--accent2)">제2분대장 (310)</text>
+          <rect x="510" y="110" width="130" height="28" rx="5" fill="none" stroke="var(--accent2)" stroke-width="1.5"/>
+          <text x="575" y="129" text-anchor="middle" font-size="11" fill="var(--accent2)">제3분대장 (410)</text>
+          <!-- 수직 통신 ① -->
+          <line x1="250" y1="87" x2="115" y2="110" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-comm)"/>
+          <line x1="350" y1="87" x2="345" y2="110" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-comm)"/>
+          <line x1="420" y1="87" x2="575" y2="110" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-comm)"/>
+          <text x="170" y="95" text-anchor="middle" font-size="9" fill="var(--muted)">① 수직 통신</text>
+          <!-- 수평 교신 ② -->
+          <line x1="180" y1="124" x2="280" y2="124" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="5,3"/>
+          <line x1="410" y1="124" x2="510" y2="124" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="5,3"/>
+          <text x="230" y="118" text-anchor="middle" font-size="9" fill="var(--muted)">② 수평 교신</text>
+          <!-- 분대원 -->
+          <rect x="30" y="152" width="170" height="22" rx="3" fill="none" stroke="var(--accent3)" stroke-width="1"/>
+          <text x="115" y="168" text-anchor="middle" font-size="10" fill="var(--accent3)">분대원 12명 (220~)</text>
+          <line x1="115" y1="138" x2="115" y2="152" stroke="var(--accent3)" stroke-width="1" marker-end="url(#arr-comm)"/>
+          <!-- 용병 풀 ④ -->
+          <rect x="620" y="55" width="70" height="32" rx="5" fill="none" stroke="var(--warn)" stroke-width="1.5"/>
+          <text x="655" y="76" text-anchor="middle" font-size="10" fill="var(--warn)">용병 풀</text>
+          <line x1="420" y1="71" x2="620" y2="71" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-comm)"/>
+          <text x="520" y="65" text-anchor="middle" font-size="9" fill="var(--muted)">④ 외부 호출</text>
+        </svg>
+      </div>
+      <div class="highlight">
+        제1분대 분대원은 제1분대장의 지시와 자신의 결과만 컨텍스트에 포함. <strong>제2·3분대의 통신은 일절 유입되지 않는다</strong> → 추론 정확도 향상, 환각(hallucination) 감소.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 16. 실패 처리 + 자율 장착 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">자율성과 안정성의</span> 양립</h2>
+      <div class="two-col">
+        <div>
+          <h3 style="color:var(--accent)">3단계 실패 처리</h3>
+          <ol>
+            <li><strong>재시도</strong> (1회) — 동일 작업 재실행</li>
+            <li><strong>대안 투입</strong> — 다른 역할/모델 투입</li>
+            <li><strong>상위 보고</strong> — 분대장 → 소대장 에스컬레이션</li>
+          </ol>
+          <p style="font-size:0.92rem;margin-top:8px;">개별 에이전트 실패가 전체 시스템에 파급되지 않도록 <strong>계층적으로 격리</strong>한다.</p>
+        </div>
+        <div>
+          <h3 style="color:var(--accent3)">기능 모듈 자율 장착</h3>
+          <ol>
+            <li><strong>임무 분석</strong> — 분대원이 스스로 필요 도구 판단</li>
+            <li><strong>1순위</strong> — 사용자 커스텀 모듈에서 선택</li>
+            <li><strong>2순위</strong> — 외부 마켓플레이스에서 탐색</li>
+          </ol>
+          <p style="font-size:0.92rem;margin-top:8px;">자율 장착하되 <strong>계층적 권한 구조</strong>로 보안 위험 차단. 하위 에이전트 생성 등 위험 권한은 상위 계층에 한정.</p>
+        </div>
+      </div>
+      <div class="highlight green">
+        <strong>"자율성을 높이면 보안 위험이 증가한다"는 트레이드오프</strong>를 해결. 자율성과 보안성을 구조적으로 양립시킨다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PART 6: 정말 다른가 — 선행기술 비교 (2장)       -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- ===== 17. 선행기술 종합 비교 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="section-label">PART 06 — 정말 다른가</div>
+      <h2><span class="text">선행기술 대비</span> 종합 비교</h2>
+      <div class="table-wrap"><table>
+        <tr><th>비교 항목</th><th>MetaGPT</th><th>CrewAI</th><th>AutoGen</th><th>HALO</th><th style="color:var(--accent2);font-weight:900">본 발명</th></tr>
+        <tr><td><strong>통신 구조</strong></td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>3계층</td><td style="color:var(--accent)">O(n) 계층</td></tr>
+        <tr><td><strong>편성 공식</strong></td><td>없음</td><td>없음</td><td>없음</td><td>없음</td><td style="color:var(--accent)">P+N(1+M)+K</td></tr>
+        <tr><td><strong>모델 배치</strong></td><td>단일 모델</td><td>단일 모델</td><td>단일 모델</td><td>미정의</td><td style="color:var(--accent)">동적 3계층</td></tr>
+        <tr><td><strong>이종 AI</strong></td><td>미지원</td><td>미지원</td><td>미지원</td><td>미지원</td><td style="color:var(--accent)">공유 풀</td></tr>
+        <tr><td><strong>사용자 개입</strong></td><td>제한 없음</td><td>수시</td><td>반복</td><td>미정의</td><td style="color:var(--accent)">3회 이내</td></tr>
+        <tr><td><strong>확장 방식</strong></td><td>재설계</td><td>재구성</td><td>재설계</td><td>미정의</td><td style="color:var(--accent)">소대 복제</td></tr>
+        <tr><td><strong>비용 예측</strong></td><td>불가</td><td>불가</td><td>불가</td><td>불가</td><td style="color:var(--accent)">공식 산출</td></tr>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ===== 18. 6가지 차별점 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">6가지 고유 기술 특징 —</span> 선행기술에서 미발견</h2>
+      <div class="card-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="card">
+          <div class="value" style="font-size:0.95rem;color:var(--accent)">① 정량적 편성 공식</div>
+          <div class="desc">P + N × (1+M) + K 공식으로 팀 규모 사전 결정</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:0.95rem;color:var(--accent2)">② 이중 비용 절감</div>
+          <div class="desc">통신 경로 감소 × 동적 모델 배치의 곱셈적 결합</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:0.95rem;color:var(--accent3)">③ 통합 소대 관제</div>
+          <div class="desc">복수 소대를 하나의 관제 체계로 통합 원격 관리</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:0.95rem;color:var(--warn)">④ 사용자 개입 상한</div>
+          <div class="desc">3회 이내로 명확히 제한 + 승인 게이트</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:0.95rem;color:var(--accent)">⑤ 소대 복제 확장</div>
+          <div class="desc">구조 변경 없이 소대 단위 복제로 선형 확장</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:0.95rem;color:var(--accent2)">⑥ 이종 AI 공유 풀</div>
+          <div class="desc">외부 AI 연동 복잡도를 8개로 고정 (종래 41×4=164 → 본 발명 8)</div>
+        </div>
+      </div>
+      <div class="highlight purple">
+        이 6가지를 <strong>조합으로라도</strong> 갖추고 있는 선행기술은 발견되지 않는다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- PART 7: 확장과 기대 효과 (3장)                  -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- ===== 19. 확장 모델 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="section-label">PART 07 — 확장과 기대 효과</div>
+      <h2><span class="text">소대 복제 —</span> 45 → 450 → 4,500</h2>
+      <p>동일한 소대 편제를 <strong>복제만 하면</strong> 규모가 선형적으로 확장된다. 소대 간 직접 의존 없음 → 구조 변경 불필요.</p>
+      <div class="card-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="card" style="text-align:center;">
+          <div class="label">1 소대</div>
+          <div class="value">45</div>
+          <div class="desc">기본 편제<br>통신 48 / 비용 약 5%</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="label">10 소대</div>
+          <div class="value" style="color:var(--accent2)">450</div>
+          <div class="desc">통합 관제 모듈 적용<br>통신 453 / 경로 99.6% 감소</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="label">100 소대</div>
+          <div class="value" style="color:var(--accent3)">4,500</div>
+          <div class="desc">초대규모 작전<br>통신 4,503 / 경로 99.96% 감소</div>
+        </div>
+      </div>
+      <div class="highlight">
+        종래: 통신 경로 약 <strong>1,012만 개</strong>. 본 발명: <strong>4,503개</strong>. <strong>2,248배의 격차</strong> — 이것이 구조 혁신의 위력이다.<br>
+        <span style="font-size:0.9rem;">※ 각 에이전트는 임무에 필요한 <strong>기능 모듈(Skill)</strong>을 자율 선택·장착하여 수행 능력을 확장한다.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 20. 기대 효과 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">기대</span> 효과</h2>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent)">예측 가능한 편성</div>
+          <div class="desc">편성 공식에 변수를 대입하면 팀 구조 확정. 프로젝트 규모와 무관하게 일관된 팀 편성.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent2)">이중 비용 절감</div>
+          <div class="desc">통신 O(n²)→O(n) + 동적 모델 배치 = 곱셈적 비용 절감. 규모 확대 시 가속 증대.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent3)">이종 AI 통합</div>
+          <div class="desc">내부 AI + 외부 AI를 하나의 편제에서 통합 운용. 각 AI의 특화 능력을 최적 활용.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--warn)">컨텍스트 순수성</div>
+          <div class="desc">계층적 통신으로 무관 정보 유입 차단. 추론 정확도 향상, 환각 감소.</div>
+        </div>
+      </div>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;margin-top:4px;">
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent)">선형 확장성</div>
+          <div class="desc">소대 복제만으로 45 → 450 → 4,500. 구조 변경 없이 무한 확장.</div>
+        </div>
+        <div class="card">
+          <div class="value" style="font-size:1.05rem;color:var(--accent2)">자율 + 통제 양립</div>
+          <div class="desc">사용자 3회 개입으로 통제권 유지하면서 AI 자율 운용 극대화.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 21. 적용 분야 ===== -->
+  <div class="slide">
+    <div class="slide-inner">
+      <h2><span class="text">산업</span> 적용 분야</h2>
+      <p>소대 편제는 <strong>도메인 비종속적 구조</strong>이다. 분대원 역할(M)만 해당 산업에 맞게 바꾸면 동일 시스템 적용 가능.</p>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="card"><div class="value" style="font-size:1.05rem;color:var(--accent)">소프트웨어 개발</div><div class="desc">풀스택 개발팀 45명 편성. 프론트/백/DB/보안/테스트 분대원으로 병렬 개발.</div></div>
+        <div class="card"><div class="value" style="font-size:1.05rem;color:var(--accent2)">데이터 분석·AI 연구</div><div class="desc">수집/전처리/분석/시각화 분대원 편성. 대규모 데이터셋 병렬 처리.</div></div>
+        <div class="card"><div class="value" style="font-size:1.05rem;color:var(--accent3)">콘텐츠 제작</div><div class="desc">기획/집필/편집/디자인/번역 분대원 편성. 다국어 대량 콘텐츠 생산.</div></div>
+        <div class="card"><div class="value" style="font-size:1.05rem;color:var(--warn)">컨설팅·감사</div><div class="desc">조사/분석/보고서 분대원 편성. 감사 증적 자동 확보.</div></div>
+      </div>
+      <div class="highlight">
+        편성 공식의 변수만 바꾸면 <strong>어떤 도메인이든</strong> 동일한 조율 효과를 얻을 수 있다.<br>
+        <strong>P</strong> = 본부 정원 (소대장+연락병), <strong>N</strong> = 분대 수, <strong>M</strong> = 분대당 분대원 수, <strong>K</strong> = 용병(외부 AI) 수
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 출원번호통지서 + 감사합니다 ===== -->
+  <div class="slide end-slide">
+    <div class="slide-inner" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+      <img src="특허출원번호통지서.png" alt="특허출원번호통지서" style="max-width:560px;width:100%;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+      <p style="margin-top:24px;font-size:0.95rem;color:var(--accent);font-weight:700;">군의 편제 지혜를 AI의 미래로</p>
+      <p style="margin-top:8px;font-size:1.1rem;color:var(--muted);font-weight:600;">감사합니다</p>
+      <p style="margin-top:16px;font-size:0.85rem;color:var(--muted);letter-spacing:0.05em;">White Tiger · 백호</p>
+    </div>
+  </div>
+
+</div>
+
+<nav class="nav-bar">
+  <button class="nav-btn" id="btn-p" onclick="prev()" aria-label="이전 슬라이드">◀ 이전</button>
+  <span class="counter" id="counter" aria-live="polite">1 / 24</span>
+  <button class="nav-btn" id="btn-n" onclick="next()" aria-label="다음 슬라이드">다음 ▶</button>
+</nav>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const btnP = document.getElementById('btn-p');
+const btnN = document.getElementById('btn-n');
+const counter = document.getElementById('counter');
+const progress = document.getElementById('progress');
+let cur = 0;
+
+function updateSlide(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides.forEach(s => s.classList.remove('active', 'prev'));
+  if (n > cur) slides[cur].classList.add('prev');
+  cur = n;
+  slides[cur].classList.add('active');
+  counter.textContent = (cur + 1) + ' / ' + slides.length;
+  progress.style.width = ((cur + 1) / slides.length * 100) + '%';
+  btnP.disabled = (cur === 0);
+  btnN.disabled = (cur === slides.length - 1);
+}
+function next() { updateSlide(cur + 1); }
+function prev() { updateSlide(cur - 1); }
+function toggleFS() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+  if (e.key === 'ArrowLeft') prev();
+  if (e.key === 'f' || e.key === 'F') toggleFS();
+  if (e.key === 'Home') updateSlide(0);
+  if (e.key === 'End') updateSlide(slides.length - 1);
+});
+let tx = 0, ty = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; });
+document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; const dy = e.changedTouches[0].clientY - ty; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { dx < 0 ? next() : prev(); } });
+document.getElementById('themeToggle').addEventListener('click', () => {
+  document.documentElement.classList.toggle('dark');
+  document.getElementById('themeToggle').textContent = document.documentElement.classList.contains('dark') ? 'Light' : 'Dark';
+});
+document.getElementById('fsToggle').addEventListener('click', toggleFS);
+updateSlide(0);
+</script>
+</body>
+</html>
