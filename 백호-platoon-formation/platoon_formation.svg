@@ -383,15 +383,15 @@
   <!-- 용병 풀 하단 비용 절감 효과 박스 -->
   <g filter="url(#shadowSm)">
     <rect x="610" y="985" width="440" height="159" rx="10" fill="#FFFCF5" stroke="#E69B00" stroke-width="1.2" stroke-dasharray="5,3"/>
-    <text x="830" y="1008" text-anchor="middle" fill="#92400e" font-size="13" font-weight="bold">소대 편제 비용 절감 효과</text>
-    <text x="630" y="1031" fill="#475569" font-size="10">통신 경로 (평면 O(n²) → 소대 O(n))</text>
+    <text x="830" y="1008" text-anchor="middle" fill="#92400e" font-size="13" font-weight="bold">구조적 효율성 (이론치 · 실측 별도 필요)</text>
+    <text x="630" y="1031" fill="#475569" font-size="10">통신 경로 수 (평면 O(n²) → 소대 O(n))</text>
 
-    <text x="630" y="1054" fill="#19232F" font-size="9.5">· 42명(1소대) — 평면 861 → 소대 45 (<tspan font-weight="bold" fill="#92400e">94.8% ↓</tspan>)</text>
-    <text x="630" y="1072" fill="#19232F" font-size="9.5">· 420명(10소대) — 평면 87,990 → 소대 423 (<tspan font-weight="bold" fill="#92400e">99.5% ↓</tspan>)</text>
-    <text x="630" y="1090" fill="#19232F" font-size="9.5">· 4,200명(100소대) — 평면 8,817,900 → 소대 4,203 (<tspan font-weight="bold" fill="#92400e">99.95% ↓</tspan>)</text>
+    <text x="630" y="1054" fill="#19232F" font-size="9.5">· 42명 — 평면 861 → 소대 45 (이론 <tspan font-weight="bold" fill="#92400e">~94.8%</tspan>)</text>
+    <text x="630" y="1072" fill="#19232F" font-size="9.5">· 420명 — 평면 87,990 → 소대 423 (이론 <tspan font-weight="bold" fill="#92400e">~99.5%</tspan>)</text>
+    <text x="630" y="1090" fill="#19232F" font-size="9.5">· 4,200명 — 평면 8,817,900 → 소대 4,203 (이론 <tspan font-weight="bold" fill="#92400e">~99.95%</tspan>)</text>
 
-    <text x="630" y="1115" fill="#475569" font-size="10">+ 차등 모델 절감 (Opus/Sonnet/Haiku 혼용)</text>
-    <text x="630" y="1133" fill="#19232F" font-size="9.5">→ 토큰·API 비용 추가 절감</text>
+    <text x="630" y="1115" fill="#475569" font-size="9.5">+ 차등 모델 배치 (Opus/Sonnet/Haiku) — 구조적 설계</text>
+    <text x="630" y="1133" fill="#64748b" font-size="8" font-style="italic">※ 통신 경로 수의 수학적 도출. 실제 토큰·API 비용은 워크로드별 측정 필요.</text>
   </g>
 
   <!-- ============================================ -->
