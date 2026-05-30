@@ -165,16 +165,35 @@ name: 백호-platoon-formation
 ```
 
 **절차:**
-1. 소대장이 AskUserQuestion으로 지휘관에게 임무 + 분대 수 + DW 부대 수 질문
-2. 지휘관이 전체 임무 + 분대별 임무 개요 + 분대 수(A/B/C형) + DW 부대 수 결정
-3. 일반 분대 수 결정에 따른 처리:
+1. 소대장은 사용자가 백호 호출 시 함께 발화한 임무 텍스트를 컨텍스트에서 추출한다.
+   (예: "백호로 결제 모듈 만들어줘" → 임무 = "결제 모듈 추가")
+2. 임무 텍스트가 모호하면 AskUserQuestion 호출 전에 일반 텍스트로 "임무를 구체화해 주십시오"라고 요청하여 명확화한다.
+3. 임무가 명확해진 후 AskUserQuestion으로 [분대 수] + [DW 부대 수] 2가지 옵션 질문을 한 번에 한다.
+4. 일반 분대 수 결정에 따른 처리:
    - **A형 유지**: 추가 스폰 없이 다음 단계로
    - **B형 확장**: Delta, Echo 2개 추가 스폰 → idle 확인
    - **C형 지정**: 지휘관이 지정한 수만큼 추가 분대장 스폰 → idle 확인
-4. DW 부대 수 결정에 따른 처리:
+5. DW 부대 수 결정에 따른 처리:
    - **편성 안 함**: 추가 스폰 없이 다음 단계로
-   - **N개 편성**: N명의 DW 부대장(Opus 4.8 이상) 추가 스폰 → idle 확인. 호칭은 DW-1, DW-2, ... (NATO 호출부호 미부여, 특수부대 표시)
-5. Phase 1.7로 진행
+   - **N개 편성**: N명의 DW 부대장 추가 스폰. 호칭 DW-1, DW-2, ... (NATO 호출부호 미부여, 특수부대 표시).
+
+     **DW 부대장 스폰 도구 호출 (개념적 예시)**:
+     ```
+     spawn teammate {
+       name: "DW-1",
+       model: "claude-opus-4-8",          // 명시 필수 (일반 분대장은 sonnet 기본)
+       initial_prompt: "너는 DW-1 부대장(특수부대)이다. 일반 분대(Alpha~)와 달리
+                        NATO 호출부호를 받지 않는다. 임무 위임 시 헤드리스
+                        claude -p 세션을 별도 진지로 띄워 그 안에서 Workflow
+                        도구를 직접 호출하여 Dynamic Workflow 엔진을 가동한다.
+                        소대장 컨텍스트는 무손상으로 유지한다. 임무 위임 전까지
+                        대기 상태로 standby."
+     }
+     ```
+
+     정확한 도구 시그니처는 Anthropic Claude Code Agent Teams 문서 참조:
+     https://docs.anthropic.com/en/docs/claude-code/overview
+6. 임무 + 분대 수 + DW 부대 수 결정 결과를 종합하여 Phase 1.7로 전달.
 
 **지휘관 상호작용 제한 원칙 (최우선):**
 
@@ -432,8 +451,12 @@ DW 부대는 다음 임무에 적합:
 
 ### 가동 절차 (DW 부대장이 직접 포격)
 
-1. 소대장이 "이건 DW형 작업"이라 판단 → DW 부대장에게 위임
-2. DW 부대장이 Bash로 헤드리스 claude 세션을 띄운다. 명령 안에 **"Workflow 도구를 직접 호출하라"**고 명시 (키워드만으로는 가짜 처리됨):
+1. **트리거 시점 (3가지)**:
+   - **(a) Phase 1.5 지휘관이 직접 편성·가동 지시**: 지휘관이 DW 부대 N개를 편성하기로 결정하고, 임무 텍스트에 DW 적합 작업(대규모 단일 의존 등)이 명시되면, 소대장은 Phase 1.7에서 DW-1에게 해당 작업을 즉시 위임.
+   - **(b) Phase 1.7 소대장이 임무 분해 후 판단**: 임무 분해 결과 "DW 적합" 작업이 식별되면 SendMessage로 DW-1에게 위임.
+   - **(c) Phase 6 임무 수행 중 분대장 요청**: 일반 분대장이 임무 처리 중 "이건 DW로 처리하는 게 낫다"고 판단하면 소대장에게 위임 요청. 소대장 승인 후 DW-1에게 임무 전달.
+   - **적합 작업 없으면**: DW-1은 Phase 7 해산까지 standby 유지 (정상). 편성됐다고 무리하게 가동하지 않는다.
+2. DW 부대장이 임무 수령 → Bash로 헤드리스 claude 세션을 띄운다. 명령 안에 **"Workflow 도구를 직접 호출하라"**고 명시 (키워드만으로는 가짜 처리됨):
    ```bash
    claude -p --output-format json "Load the Workflow tool via ToolSearch (query=select:Workflow), then CALL the Workflow tool DIRECTLY with a script that {임무 설명}. Report agent_count from the result." 2>&1
    ```
@@ -553,7 +576,7 @@ name: 백호-platoon-formation
 
 **프로젝트 관리**
 
-- **`/sal-grid-dev`** — SAL Grid Dev Suite. `Stage(S) × Area(A) × Level(L)` 3차원 좌표계로 모든 Task를 식별하고, `TASK_PLAN.md` + `grid_records/*.json` + `task-instructions/*.md` + `verification-instructions/*.md` + `stage_gate_records/*.json` + `index.json` 7개 인공물을 SSOT(Single Source of Truth)로 유지하는 개발방법론. **자기완결 대안**: 청룡 스킬이 없으면, Phase 6.3에 기술된 grid_records JSON 구조를 분대장이 직접 작성·갱신.
+- **`/sal-grid-dev`** — SAL Grid Dev Suite. `Stage(S) × Area(A) × Level(L)` 3차원 좌표계 기반 별도 개발방법론 스킬. 백호 본연 책임 외 — 본 스킬이 설치된 환경에서만 분대장이 작업 중 참조할 수 있다. **미설치 환경에서는 일반 프로젝트로 진행** (별도 처리 불필요).
 
 **팀 편성**
 
@@ -862,83 +885,6 @@ sequenceDiagram
     Lead-->>Echo: shutdown_request (확장 시)
     Lead->>Lead: TeamDelete
 ```
-
----
-name: 백호-platoon-formation
-
-## Phase 6.3. SAL Grid 반영 의무 (코드 수정 시 필수)
-
-**코드를 수정하면 반드시 SAL Grid에 기록해야 한다. 예외 없음.**
-
-> **SAL Grid란 무엇인가? (자기완결 설명)**
->
-> SAL Grid는 청룡 사신 시리즈의 형제 스킬 `/sal-grid-dev`에서 제공하는 **3차원 좌표계 기반 개발방법론**이다. 코드 한 줄 한 줄을 다음 좌표로 식별·추적한다:
->
-> - **Stage (S)** — 작업 단계 (`S0` 초기 설계 → `S1` 첫 구현 → `S2` ... → `SN` 배포까지 동적으로 N개 결정)
-> - **Area (A)** — 작업 영역 (예: `A1` 프론트엔드 / `A2` 백엔드 / `A3` DB / `A4` 인프라)
-> - **Level (L)** — 추상화 수준 (예: `L1` 단위 컴포넌트 / `L2` 모듈 / `L3` 서비스)
-> - **Variant** — 동일 좌표 내 변형 식별자 (선택)
->
-> 각 Task는 `S{n}-A{n}-L{n}` 같은 SAL ID로 식별되며, **모든 코드 작업이 어느 Stage·Area·Level에 속하는지가 사전에 정의**된다. AI 협업 시 "어디서 무엇을 하고 있는지"를 좌표로 명확히 한다.
-
-### Phase 6.3 실행 전 확인 (선행 조건)
-
-본 Phase는 **본 프로젝트가 SAL Grid Dev Suite로 구성된 경우에만 실질적으로 적용**된다. 다음 중 하나라도 존재해야 한다:
-
-- 프로젝트 루트 또는 상위에 `SAL_Grid_Dev_Suite/` 폴더
-- 또는 현재 Stage 폴더 내 `grid_records/` 디렉토리 (JSON 파일들)
-- 또는 `TASK_PLAN.md` 파일 (전체 Task 목록)
-
-위 항목이 하나도 없으면 본 프로젝트는 일반 프로젝트로 간주하고, 소대장은 본 Phase를 건너뛰고 Phase 6.5(결과 종합)로 직행한다 — **단, 그 경우에도 일반 변경 이력(git commit, worklog)은 그대로 남긴다**.
-
-### SAL Grid 프로젝트인 경우 — 소대장이 분대 보고 수집 전에 수행할 작업
-
-소대장은 다음을 순서대로 수행한다:
-
-1. **코드 수정이 있었는가?** → 있으면 SAL Grid 반영 필수.
-2. **반영 방법** (수정 유형별):
-
-   | 수정 유형 | 반영 방법 |
-   |---|---|
-   | 기존 Task의 코드 수정 | 해당 Task의 `grid_records/{TaskID}.json` 파일을 열어 `task_status`, `modification_history`, `generated_files` 갱신 |
-   | 신규 기능 추가 | `TASK_PLAN.md`에 새 행 추가 (SAL ID + Task 설명 + 의존성) + `grid_records/{NewTaskID}.json` 새 파일 생성 |
-   | Task 삭제/변경 | `TASK_PLAN.md` 행 삭제·수정 + `grid_records/{TaskID}.json` 업데이트·삭제 + 의존 Task의 `blockedBy` 갱신 |
-   | 버그 수정 | 해당 Task의 `verification_status`를 `re-verify-required`로 재설정 |
-
-3. **grid_records/{TaskID}.json 구조** (참고):
-   ```json
-   {
-     "task_id": "S1-A2-L3",
-     "task_status": "Completed",     // Pending / InProgress / Completed
-     "verification_status": "PASS",  // PASS / FAIL / re-verify-required
-     "generated_files": ["src/components/Login.tsx", "src/api/auth.ts"],
-     "build_verification": {
-       "compile": "PASS",            // tsc/lint
-       "runtime": "PASS"             // 실제 호출·실행 확인
-     },
-     "modification_history": [
-       {"timestamp": "2026-05-30T14:30Z", "agent": "Alpha-squad-leader", "change": "added Zod validation"}
-     ]
-   }
-   ```
-
-4. **글로벌 최소 완료 기준 3가지** — 어느 Task든 `task_status: "Completed"`로 표기하려면 다음 3가지를 모두 만족해야 한다:
-   - **(a) 파일 존재** — 산출물 파일이 생성되었고 `generated_files`에 기록됨
-   - **(b) 빌드 통과** — tsc/lint 에러 없음 (`build_verification.compile = PASS`)
-   - **(c) 실제 호출/실행됨** — 다른 모듈에서 import되거나, API 라우트로 접근 가능하거나, 테스트에서 호출됨 (`build_verification.runtime = PASS`)
-   - 특히 (c)가 핵심이다. **파일만 만들고 아무 데서도 안 쓰이는 코드는 미완료로 간주**한다.
-
-5. **검증** — Grid 반영 후 다음을 수행한다 (스크립트가 존재하는 경우):
-   - `node scripts/build-progress.js` 또는 동등한 진행률 계산 스크립트 → Stage별 진행률 재계산
-   - `viewer_json.html`(Viewer)이 있으면 브라우저로 열어 `index.json` + `grid_records/*.json`이 정상 로드되는지 확인
-
-6. **SAL Grid에 반영 없이 코드만 수정한 작업은 미완료로 간주한다.** 분대 보고 시점에 SAL Grid 반영 누락이 발견되면, 소대장은 해당 분대장에게 SendMessage로 Grid 반영 작업을 추가 지시한 후에야 Phase 6.5로 진행한다.
-
-### 적용 범위
-
-이 규칙은 소대장, 분대장, 서브에이전트 모두에게 적용된다. 분대장에게 임무 배정 시(Phase 1.7) "작업 완료 후 SAL Grid 반영 필수"를 지시에 포함한다.
-
-> **외부 도구 참조**: 본 Phase의 절차는 백호 스킬 본문만으로 수행 가능하다. 다만 청룡 스킬(`/sal-grid-dev`)이 설치되어 있으면 다음 명령으로 자동화·간소화가 가능하다 — `/sal-grid-dev add` (Task 추가), `/sal-grid-dev modify` (Task 수정), `/sal-grid-dev status` (진행률 확인). 청룡 미설치 환경에서는 본 절차를 수동으로 수행한다.
 
 ---
 name: 백호-platoon-formation
