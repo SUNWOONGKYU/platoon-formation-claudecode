@@ -62,7 +62,7 @@
   용병 풀 (공유 자산, 특수정찰):  Codex · Gemini · Grok · Perplexity
 ```
 
-> **DW 부대(Dynamic Workflow Unit)** — 일반 분대(Alpha~Lima)가 보병이라면 DW 부대는 포병(대량 화력). NATO 호출부호 없는 특수부대로, 부대장이 별도 헤드리스 `claude -p` 세션에서 `Workflow` 도구를 직접 호출해 DW 엔진을 가동한다. 소대장 컨텍스트는 무손상으로 유지된다. **Claude Pro 이상 + Opus 4.8 이상 환경에서만 가동**. 일반 분대 + DW 부대 + 용병 = 제병협동(諸兵協同) 지휘 체계.
+> **DW 부대(Dynamic Workflow Unit)** — 일반 분대(Alpha~Lima)가 보병이라면 DW 부대는 포병(대량 화력). NATO 호출부호 없는 특수부대로, 부대장이 별도 헤드리스 `claude -p` 세션에서 `Workflow` 도구를 직접 호출해 DW 엔진을 가동한다. 소대장 컨텍스트는 무손상으로 유지된다. **Claude Max·Team·Enterprise 플랜 + Opus 4.8 이상 환경에서만 가동 (Pro 플랜 미지원)**. 일반 분대 + DW 부대 + 용병 = 제병협동(諸兵協同) 지휘 체계.
 
 전체 구조는 [`백호-platoon-formation/platoon_formation.svg`](./백호-platoon-formation/platoon_formation.svg)를 참조하세요.
 

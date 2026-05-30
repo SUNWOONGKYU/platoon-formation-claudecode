@@ -3,7 +3,6 @@ name: 백호-platoon-formation
 description: "백호 (白虎 · White Tiger) — 소대 편제 방식 팀구성 (44명~) - 소대장+N분대(Alpha/Bravo/Charlie/Delta/Echo/...) + 용병4 + Skill Package(지속 확장형). 특허출원 10-2026-0041235 (출원일 2026.03.07)."
 user-invocable: true
 ---
-name: 백호-platoon-formation
 
 # Platoon Formation (소대 편제 방식 팀구성)
 
@@ -22,7 +21,6 @@ name: 백호-platoon-formation
 > 백호 스킬을 실행하는 Claude Code 환경에 Agent Teams가 활성화되어 있지 않으면 본 스킬의 분대 편성이 작동하지 않는다. 사전에 활성화를 확인한다.
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 0. 소대 추가 여부 확인 (지휘관 결정)
 
@@ -44,13 +42,15 @@ name: 백호-platoon-formation
 
 ### 복수 소대 (추가)
 → 지휘관에게 추가할 소대 수(2/3/4/…)를 한 번 더 입력받는다.
-→ Claude Code의 다중 메인 에이전트 운영 기능을 활용하여 동일 세션 내에서 N개 소대를 동시 가동한다.
-→ 각 소대는 **독립된 소대장·분대장·분대원·임무**를 가지며, 같은 Claude Code 세션 안에서 병렬적으로 Phase 1~7을 수행한다.
-→ 소대 간 통신은 불필요 — 각 소대는 자체 임무에 집중한다.
-→ 외부 셸·터미널 멀티플렉서·별도 프로세스는 사용하지 않는다 (모두 한 Claude Code 안에서 처리).
+→ Claude Code 데스크톱 앱의 멀티 패널 기능 (또는 Claude Code on the web의 멀티 태스크 기능)을 활용하여 **한 앱 안에서 N개 세션을 시각적으로 동시 운영**한다.
+→ 각 세션은 **독립된 Claude Code 세션** (Agent Teams의 세션당 main agent 1명 원칙 유지)이며, 각자 독립 소대장·분대·임무를 가진다.
+→ 사용자(지휘관)는 한 앱 화면에서 N개 세션을 동시 모니터링·전환 가능.
+→ 세션 간 직접 통신은 불가 — 소대 간 협업이 필요한 임무는 부적합. 각 소대가 독립적으로 처리할 수 있는 임무에 한해 복수 소대 운용.
+→ tmux 같은 외부 터미널 멀티플렉서는 불필요 (Claude Code 앱이 내장 멀티 패널 지원).
+
+> 참고: Claude Code CLI 단독 환경에서는 멀티 패널이 없어 단일 세션만 가동. 이 경우 복수 소대 대신 분대 수를 늘려(B형 5분대 / C형 N분대) 대응한다.
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 1. 팀 생성 및 소대 편성
 
@@ -140,7 +140,6 @@ name: 백호-platoon-formation
 - [ ] Phase 1.5 임무 부여 + 분대 수 결정 대기
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 1.5. 임무 부여 + 분대 수 결정 (지휘관 개입 ①)
 
@@ -161,7 +160,7 @@ name: 백호-platoon-formation
   • 편성 안 함 (일반 분대만 운용)
   • 1개 편성 (DW-1)
   • N개 편성 (대규모 단일 의존 작업 시 N개 — DW-1, DW-2, ...)
-  ※ DW 부대는 Opus 4.8 이상 + Claude Pro 이상 플랜에서만 가동
+  ※ DW 부대는 Opus 4.8 이상 + Claude Max·Team·Enterprise 플랜에서만 가동 (Pro 플랜 미지원)
 ```
 
 **절차:**
@@ -241,7 +240,6 @@ name: 백호-platoon-formation
 - 작전 수행 중 파일 접근/도구 사용으로 권한 팝업을 유발하지 않는다
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 1.7. 소대장 작업 분해 및 업무·모델·권한 통합 배정
 
@@ -278,7 +276,7 @@ name: 백호-platoon-formation
 | 정규병 (SubAgent) | N×12 | haiku / sonnet | 12개/분대, 분대장이 작업 복잡도 판단하여 선정 |
 | 예비병 (SubAgent) | N×3 | haiku / sonnet | 3개/분대, 보조 인력 (정원 외) |
 | 용병 (외부 AI) | 4 | 타사 모델 | 공유 풀, 특화 작업 |
-| **합계** | **45명~** | | 예비병 별도 |
+| **합계** | **44명~** | | 예비병 별도 |
 
 **편제 공식:** HQ(1) + N Squads × 13(Leader+12정규) + 4 Mercenaries(Shared) (N≥3) + 예비병 N×3 별도
 
@@ -327,7 +325,7 @@ name: 백호-platoon-formation
 
 **분대장의 분대원 투입 원칙:** 분대장이 세부 작업을 분해한 후, 다음 기준에 따라 분대원을 투입한다.
 - **에이전트 탐색 우선순위** (2단계 Fallback):
-  1. **1순위 — 사용자 커스텀 에이전트**: 표준 분대원 11종(위 표) 및 `~/.claude/agents/`에 사용자가 사전 등록한 커스텀 에이전트를 포함하여, 작업 성격에 적합한 분대원을 우선 선정한다 (예: UI 구현→frontend-developer, 보안 점검→security-specialist)
+  1. **1순위 — 사용자 커스텀 에이전트**: 표준 분대원(기본 12종, 위 표) 및 `~/.claude/agents/`에 사용자가 사전 등록한 커스텀 에이전트를 포함하여, 작업 성격에 적합한 분대원을 우선 선정한다 (예: UI 구현→frontend-developer, 보안 점검→security-specialist). 분대원 수는 12개로 한정되지 않으며 커스텀 추가에 따라 N개까지 확장 가능.
   2. **2순위 — 외부 탐색**: 등록된 에이전트 중 적합한 것이 없는 경우, Anthropic 공식 에이전트, GitHub 커뮤니티 등 외부 소스에서 적합한 에이전트를 탐색하여 투입한다
 - **모델 등급 선정**: 추론이 필요한 작업(코드 구현, 분석)→중급 모델(sonnet), 정형적 작업(단순 반복, 템플릿)→경량 모델(haiku)
 - **결과 수집**: 분대원 작업 결과를 수집·검증하여 소대장에게 보고. 실패 시 재시도(1회)→대안 투입→상위 보고의 3단계 대응
@@ -348,7 +346,7 @@ name: 백호-platoon-formation
 3. **작업 확인**: 승인 후, TaskList에서 할당된 작업 확인
 4. **작업 Claim**: TaskUpdate로 owner를 자신으로 설정, status를 in_progress로 변경
 5. **병력 동원**:
-   - 분대원: Task 도구로 haiku/sonnet 모델 투입 (11개 표준 편제)
+   - 분대원: Task 도구로 haiku/sonnet 모델 투입 (기본 12종 표준 편제 + 사용자 커스텀 추가 가능)
    - 용병(외부 AI CLI): Bash에서 headless 모드로 호출 (4개 공유 풀)
 6. **진행 보고**: 작업 중 중요 변경점이나 블로커 발생 시 SendMessage로 소대장에게 보고
 7. **임무 완료**: TaskUpdate로 status를 completed로 변경 후 결과 보고
@@ -378,7 +376,6 @@ name: 백호-platoon-formation
 ```
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 2. 용병 투입 전략 (외부 AI — 공유 풀)
 
@@ -388,7 +385,7 @@ name: 백호-platoon-formation
 
 | # | 용병명 | 제공 | 호출 방법 | 특장점 | 투입 시점 |
 |---|-------|------|----------|--------|----------|
-| 1 | **Codex** | OpenAI | `codex -p "프롬프트" --full-auto -C "디렉토리"` | 코드 자동 생성/실행 | 새 프로젝트 스캐폴딩, 보일러플레이트 |
+| 1 | **Codex** | OpenAI | `codex exec --skip-git-repo-check "프롬프트"` | 코드 자동 생성/실행 | 새 프로젝트 스캐폴딩, 보일러플레이트 |
 | 2 | **Gemini** | Google | `gemini -p "프롬프트" --context-window=2M` | 대용량 컨텍스트(200만 토큰) | 전체 코드베이스 분석, 대규모 리팩토링 |
 | 3 | **Grok** | xAI | `grok -p "프롬프트" --fast` | 빠른 응답, 실시간 검색 | 빠른 프로토타이핑, 트렌드 조사 |
 | 4 | **Perplexity** | Perplexity | MCP (`perplexity_ask`) | 실시간 웹 검색, 리서치 | 최신 정보, API 사양, 베스트 프랙티스 |
@@ -427,7 +424,6 @@ perplexity_ask 도구 사용
 ```
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 2.5. DW 부대 (Dynamic Workflow Unit — 특수부대)
 
@@ -471,7 +467,7 @@ DW 부대는 다음 임무에 적합:
 
 ### 사전 조건 (1회 활성화)
 
-**플랜 요구사항:** Claude Pro 이상 (Pro 미만에서는 Dynamic Workflows 미지원 — 본 Phase 2.5는 가동 불가).
+**플랜 요구사항:** Claude **Max · Team · Enterprise** 플랜에서만 가동. **Pro 플랜은 Dynamic Workflows 미지원** (Anthropic 공식). 본 Phase 2.5는 위 3개 플랜에서만 가동 가능.
 
 1. `/config` → **Dynamic workflows** ON (Max·Team 기본 ON / Pro 수동)
    - 확인: `~/.claude.json`에 `"tengu_workflows_enabled": true`
@@ -484,9 +480,9 @@ DW 부대는 다음 임무에 적합:
    - **(b) Phase 1.7 소대장이 임무 분해 후 판단**: 임무 분해 결과 "DW 적합" 작업이 식별되면 SendMessage로 DW-1에게 위임.
    - **(c) Phase 6 임무 수행 중 분대장 요청**: 일반 분대장이 임무 처리 중 "이건 DW로 처리하는 게 낫다"고 판단하면 소대장에게 위임 요청. 소대장 승인 후 DW-1에게 임무 전달.
    - **적합 작업 없으면**: DW-1은 Phase 7 해산까지 standby 유지 (정상). 편성됐다고 무리하게 가동하지 않는다.
-2. DW 부대장이 임무 수령 → Bash로 헤드리스 claude 세션을 띄운다. 명령 안에 **"Workflow 도구를 직접 호출하라"**고 명시 (키워드만으로는 가짜 처리됨):
+2. DW 부대장이 임무 수령 → Bash로 헤드리스 claude 세션을 띄운다. 헤드리스 `claude -p` 세션엔 `Workflow`가 이미 top-level 도구이므로 ToolSearch 로드 단계는 불필요. 명령에 **"CALL the Workflow tool DIRECTLY"**를 명시한다 (키워드만으로는 가짜 처리됨):
    ```bash
-   claude -p --output-format json "Load the Workflow tool via ToolSearch (query=select:Workflow), then CALL the Workflow tool DIRECTLY with a script that {임무 설명}. Report agent_count from the result." 2>&1
+   claude -p --output-format json "CALL the Workflow tool DIRECTLY with a script that {임무 설명}. Report agent_count from the result." 2>&1
    ```
    - `{임무 설명}` 부분에 부대장이 받은 구체적 임무를 채워 넣는다.
    - 모델 지정이 필요하면 `--model claude-opus-4-8` 옵션 추가.
@@ -505,7 +501,6 @@ DW 부대는 다음 임무에 적합:
 DW 부대는 수십~수백 에이전트라 토큰 소비가 크다. 대량 화력이 필요한 작전에만 신중 투입한다.
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 3. 스킬 연동 (다른 스킬과의 시너지)
 
@@ -515,7 +510,7 @@ name: 백호-platoon-formation
 
 **연동 방식:**
 1. 분대장이 임무를 받으면 `/deploy-subagent`의 탐색 로직 적용
-   - 1순위: 사용자 커스텀 에이전트 (표준 11종 + `~/.claude/agents/` + 내장 subagent_type)
+   - 1순위: 사용자 커스텀 에이전트 (표준 12종 + `~/.claude/agents/` + 내장 subagent_type)
    - 2순위: 외부 탐색 또는 신규 생성
 2. 적합한 에이전트를 찾으면 Task 도구로 투입
 3. 에이전트가 없으면 `/deploy-subagent`의 커스텀 에이전트 생성 템플릿 사용
@@ -552,7 +547,6 @@ Bravo 분대장이 "시스템 아키텍처 다이어그램" 임무를 받음
 ```
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 4. 스킬 장착 체계 (Skills System)
 
@@ -608,7 +602,7 @@ name: 백호-platoon-formation
 
 **팀 편성**
 
-- **`/deploy-subagent`** — 분대원 투입 시 2단계 Fallback: ① 1순위 사용자 커스텀 에이전트(`~/.claude/agents/{name}.md`) 또는 표준 11종(frontend-developer, ux-ui-designer, …) 탐색 → ② 2순위 내장 subagent_type(`general-purpose`, `Plan`, `Explore`) 사용. **자기완결 대안**: 본 스킬 부재 시 분대장이 Phase 3 본문의 정규병 12종 / 예비병 3종 표를 직접 보고 적절한 에이전트를 Task 도구로 투입.
+- **`/deploy-subagent`** — 분대원 투입 시 2단계 Fallback: ① 1순위 사용자 커스텀 에이전트(`~/.claude/agents/{name}.md`) 또는 표준 12종(frontend-developer, ux-ui-designer, …) 탐색 → ② 2순위 내장 subagent_type(`general-purpose`, `Plan`, `Explore`) 사용. **자기완결 대안**: 본 스킬 부재 시 분대장이 Phase 3 본문의 정규병 12종 / 예비병 3종 표를 직접 보고 적절한 에이전트를 Task 도구로 투입.
 - **`/deploy-skill`** — 임무 분석 후 사용할 스킬 조합을 자동 선정·장착. **자기완결 대안**: 분대장이 위 스킬 표에서 임무에 맞는 항목을 직접 선택.
 - **`/find-skills`** — `skills.sh` 등 외부 스킬 마켓플레이스에서 임무에 적합한 신규 스킬을 검색·설치. **자기완결 대안**: 분대장이 GitHub/웹 검색으로 직접 탐색하여 `~/.claude/skills/`에 수동 설치.
 
@@ -738,7 +732,6 @@ Skill({skill: "create-image", args: "API 아키텍처 다이어그램"})
 - 분대장/서브에이전트 모두 사용 가능
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 4.5. 통신 체계
 
@@ -756,7 +749,6 @@ name: 백호-platoon-formation
 - 의견 충돌 시 소대장이 자율 중재
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 5. 작전 대기 상태 보고
 
@@ -771,11 +763,11 @@ name: 백호-platoon-formation
 
 | 분대 | 분대장 | 배정 임무 | 분대원 | 상태 |
 |------|--------|----------|--------|------|
-| 1분대 | Alpha   | {배정 임무} | 11개 (분대원) | 대기 |
-| 2분대 | Bravo   | {배정 임무} | 11개 (분대원) | 대기 |
-| 3분대 | Charlie | {배정 임무} | 11개 (분대원) | 대기 |
-| 4분대 | Delta   | {배정 임무} | 11개 (분대원) | 대기 |  ← 확장 시
-| 5분대 | Echo    | {배정 임무} | 11개 (분대원) | 대기 |  ← 확장 시
+| 1분대 | Alpha   | {배정 임무} | 분대원 (기본 12종, 커스텀 추가 가능) | 대기 |
+| 2분대 | Bravo   | {배정 임무} | 분대원 (기본 12종, 커스텀 추가 가능) | 대기 |
+| 3분대 | Charlie | {배정 임무} | 분대원 (기본 12종, 커스텀 추가 가능) | 대기 |
+| 4분대 | Delta   | {배정 임무} | 분대원 (기본 12종, 커스텀 추가 가능) | 대기 |  ← 확장 시
+| 5분대 | Echo    | {배정 임무} | 분대원 (기본 12종, 커스텀 추가 가능) | 대기 |  ← 확장 시
 
 [용병 풀] 공유 자산 — 소대장/분대장 누구나 호출 가능
 - Codex (코드 생성)
@@ -790,7 +782,6 @@ name: 백호-platoon-formation
 ```
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 5.5. 작전 개시 승인 게이트 (지휘관 개입 ②)
 
@@ -839,7 +830,6 @@ Phase 5의 작전 대기 상태 보고를 확인한 지휘관이 **작전 개시
 - **중간 승인 금지**: 작전 승인 후 임무 단계 간 전환(검토→수정→배포 등)에서 추가 승인을 요청하지 않는다. 소대장이 자율 판단하여 다음 단계로 진행한다.
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 6. 임무 수행 흐름도
 
@@ -915,7 +905,6 @@ sequenceDiagram
 ```
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 6.5. 결과 종합 및 보고
 
@@ -1049,12 +1038,10 @@ name: 백호-platoon-formation
 - **상태**: {완료/부분완료}
 
 ---
-name: 백호-platoon-formation
 
 {Step 3의 종합 보고서 본문 전체}
 
 ---
-name: 백호-platoon-formation
 
 ## 메타데이터
 
@@ -1086,7 +1073,6 @@ name: 백호-platoon-formation
 - **워크로그 필수 저장**: 지휘관 보고 전에 반드시 워크로그에 저장한다. 보고서는 화면에서 사라지지만 워크로그는 남는다
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 7. 해산 승인 게이트
 
@@ -1119,7 +1105,6 @@ name: 백호-platoon-formation
 - **결과 보고 선행 필수**: Phase 6.5 종합 보고서 출력 없이 해산 승인을 요청할 수 없다
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 8. 고급 전략
 
@@ -1162,7 +1147,6 @@ Perplexity를 적극 활용하여 최신 정보 확보.
 4. 다음 임무부터 재사용
 
 ---
-name: 백호-platoon-formation
 
 ## Phase 9. 트러블슈팅
 
@@ -1176,7 +1160,7 @@ name: 백호-platoon-formation
   - CLI 설치 확인: `which {cli명령어}` (Windows PowerShell은 `Get-Command {cli명령어}`)
   - API 키 확인: `echo $API_KEY_NAME` (Windows PowerShell은 `$env:API_KEY_NAME`)
   - 설치 가이드:
-    - **Codex CLI**: https://github.com/openai/codex (npm install -g @openai/codex-cli, 환경변수 `OPENAI_API_KEY`)
+    - **Codex CLI**: https://github.com/openai/codex (`npm install -g @openai/codex`, 환경변수 `OPENAI_API_KEY`)
     - **Gemini CLI**: https://github.com/google-gemini/gemini-cli (npm install -g @google/gemini-cli, 환경변수 `GEMINI_API_KEY` 또는 OAuth)
     - **Grok CLI**: https://docs.x.ai/docs (CLI 또는 API, 환경변수 `XAI_API_KEY`)
     - **Perplexity MCP**: MCP 서버로 호출 — Claude Code MCP 설정에 `perplexity` 등록 후 사용 (https://docs.perplexity.ai/)
@@ -1198,16 +1182,15 @@ name: 백호-platoon-formation
 - **예방:** 분대장 보고 수신 즉시 Phase 6.5 Step 3(종합 보고서 작성) + Step 4(워크로그 저장) 진행. 워크로그에 저장된 결과는 컨텍스트 압축·세션 종료와 무관하게 영구 보존됨. `{프로젝트루트}/worklog/` 디렉토리에서 과거 작전 결과를 언제든 재참조 가능
 
 ---
-name: 백호-platoon-formation
 
 ## 요약 (Quick Reference)
 
 ### 편성 절차
 1. TeamCreate (`{폴더명}-platoon`)
 2. Alpha, Bravo, Charlie (+ Delta, Echo) 스폰 (sonnet 모델, 각 정규 12 + 예비 3)
-3. 편제 보고 (45명 이상)
+3. 편제 보고 (44명 이상)
 
-### 편제표 (45명~, 상한 없음)
+### 편제표 (44명~, 상한 없음)
 ```
 HQ (1명)
 └── 소대장 (Opus) — Orchestrator
