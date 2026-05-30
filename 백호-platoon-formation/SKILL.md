@@ -168,7 +168,35 @@ name: 백호-platoon-formation
 1. 소대장은 사용자가 백호 호출 시 함께 발화한 임무 텍스트를 컨텍스트에서 추출한다.
    (예: "백호로 결제 모듈 만들어줘" → 임무 = "결제 모듈 추가")
 2. 임무 텍스트가 모호하면 AskUserQuestion 호출 전에 일반 텍스트로 "임무를 구체화해 주십시오"라고 요청하여 명확화한다.
-3. 임무가 명확해진 후 AskUserQuestion으로 [분대 수] + [DW 부대 수] 2가지 옵션 질문을 한 번에 한다.
+3. 임무가 명확해진 후 AskUserQuestion으로 [분대 수] + [DW 부대 수] 2가지 옵션 질문을 **한 번에** 한다 (`questions` 배열에 두 질문 객체를 넣음 — 두 번 분리 호출하지 않는다).
+
+   **AskUserQuestion 도구 호출 (개념적 예시)**:
+   ```
+   AskUserQuestion({
+     questions: [
+       {
+         question: "일반 분대 수를 결정해 주십시오",
+         header: "분대 수",
+         multiSelect: false,
+         options: [
+           { label: "A형 (3개)", description: "기본 — Alpha, Bravo, Charlie" },
+           { label: "B형 (5개)", description: "Delta, Echo 추가" },
+           { label: "C형 (6개 이상)", description: "지정" }
+         ]
+       },
+       {
+         question: "DW 부대 편성 여부",
+         header: "DW 부대",
+         multiSelect: false,
+         options: [
+           { label: "편성 안 함", description: "일반 분대만 운용" },
+           { label: "1개 편성 (DW-1)", description: "대규모 단일 의존 작업 전담" },
+           { label: "N개 편성", description: "임무 규모에 따라 DW-1, DW-2, ..." }
+         ]
+       }
+     ]
+   })
+   ```
 4. 일반 분대 수 결정에 따른 처리:
    - **A형 유지**: 추가 스폰 없이 다음 단계로
    - **B형 확장**: Delta, Echo 2개 추가 스폰 → idle 확인
