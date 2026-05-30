@@ -469,8 +469,8 @@ DW 부대는 다음 임무에 적합:
 
 **플랜 요구사항:** Claude **Max · Team · Enterprise** 플랜에서만 가동. **Pro 플랜은 Dynamic Workflows 미지원** (Anthropic 공식). 본 Phase 2.5는 위 3개 플랜에서만 가동 가능.
 
-1. `/config` → **Dynamic workflows** ON (Max·Team 기본 ON / Pro 수동)
-   - 확인: `~/.claude.json`에 `"tengu_workflows_enabled": true`
+1. `/config` → **Dynamic workflows** ON (Max·Team·Enterprise 플랜에서 사용 가능. Pro 플랜은 항목 미제공/미지원)
+   - 확인: `~/.claude.json`에 `"tengu_workflows_enabled": true` (지원 플랜 한정)
 2. 끄려면: settings.json `"disableWorkflows": true` 또는 환경변수 `CLAUDE_CODE_DISABLE_WORKFLOWS=1`
 
 ### 가동 절차 (DW 부대장이 직접 포격)
