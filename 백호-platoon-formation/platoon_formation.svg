@@ -53,7 +53,7 @@
   <g filter="url(#shadowSm)">
     <rect x="50" y="115" width="350" height="46" rx="8" fill="#FFFFFF" stroke="#475569" stroke-width="1.2" stroke-dasharray="5,3"/>
     <text x="225" y="135" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="bold">Phase 0 · 소대 추가 여부</text>
-    <text x="225" y="151" text-anchor="middle" fill="#475569" font-size="10">소대 1개 (기본) / N개 (Claude Code 내부 동시 운영)</text>
+    <text x="225" y="151" text-anchor="middle" fill="#475569" font-size="10">소대 1개 (기본) / N개 (데스크탑 앱 멀티 패널 · 웹)</text>
   </g>
 
   <!-- 편제 공식 박스 (지휘관 우측) -->
@@ -277,7 +277,7 @@
   <g filter="url(#shadowSm)">
     <rect x="50" y="725" width="1000" height="56" rx="8" fill="#FFFFFF" stroke="#64748b" stroke-width="1" stroke-dasharray="6,3"/>
     <text x="550" y="745" text-anchor="middle" fill="#475569" font-size="11"><tspan font-weight="bold" fill="#1e293b">일반 분대</tspan> (보병) — B형 확장 Delta·Echo (5분대) · C형 확장 Foxtrot~Lima (NATO 호출부호 순)</text>
-    <text x="550" y="767" text-anchor="middle" fill="#92400e" font-size="11"><tspan font-weight="bold" fill="#9a3412">+ DW 부대</tspan> (포병 · 특수부대, NATO 호출부호 없음) — DW-1, DW-2, … (N개) · <tspan font-weight="bold">Opus 4.8 + Claude Pro 이상 필수</tspan> · Phase 1.5에서 일반 분대와 함께 결정</text>
+    <text x="550" y="767" text-anchor="middle" fill="#92400e" font-size="11"><tspan font-weight="bold" fill="#9a3412">+ DW 부대</tspan> (포병 · 특수부대, NATO 호출부호 없음) — DW-1, DW-2, … (N개) · <tspan font-weight="bold">Opus 4.8 + Max·Team·Enterprise 한정 (Pro 미지원)</tspan> · Phase 1.5에서 일반 분대와 함께 결정</text>
   </g>
 
   <!-- ============================================ -->
