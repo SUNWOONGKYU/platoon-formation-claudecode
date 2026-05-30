@@ -32,15 +32,15 @@
 
 1. **소대 편성** — 소대장(Opus 1명) + 3분대 (분대장 + 정규병 12 + 예비병 3) × N + 용병 4명
 2. **임무 분해 & 통합 배정** — 소대장이 작업을 분해하고, 각 분대장에게 임무 + AI 모델 등급 + 도구 권한을 한 번에 지시
-3. **자율 작전 수행** — 분대장이 분대원을 투입, 필요 시 외부 AI(Codex/Gemini/Grok/Perplexity)를 용병으로 호출
+3. **자율 작전 수행** — 분대장이 분대원을 투입, 필요 시 외부 AI(Codex/Gemini/Grok/Perplexity)를 용병으로 호출, 대규모 단일 의존 작업은 **DW 부대(특수부대)**가 헤드리스 세션으로 전담
 4. **결과 종합 후 해산** — 보고 수집·검증·종합 보고서 작성 후 해산
 
-지휘관(사용자)의 개입은 **단 3회** — ① 임무 부여 ② 작전 승인 ③ 해산 승인.
+지휘관(사용자)의 개입은 **최대 4회** — ⓪ 소대 추가 여부 ① 임무·편성 ② 작전 승인 ③ 해산 승인.
 
 ## 🏗️ 편제 (Formation)
 
 ```
-편제 공식:  HQ(1) + N Squads × 13(Leader+12정규) + 4 Mercenaries (N≥3) + 예비병 N×3 별도
+편제 공식:  HQ(1) + N Squads × 13(Leader+12정규) + 4 Mercenaries + M DW 부대 (선택) + 예비병 N×3 별도
 
   지휘관 (사용자 / PO)  ← 유일한 인간
        │
@@ -48,16 +48,21 @@
   │ 소대 HQ  │  소대장 (Opus) — Orchestrator
   └────┬─────┘
        │
-  ┌────┼────────────────┐
-  │    │                │
-1분대 Alpha   2분대 Bravo   3분대 Charlie  ...  (B형 5분대 / C형 N분대 확장 가능)
-  │    │                │
-  └─ 분대장 (Sonnet 기본)
+  ┌────┼────────────────┬───────────────────────┐
+  │    │                │                       │
+1분대 Alpha   2분대 Bravo   3분대 Charlie  ...     DW 부대 (특수부대)
+                                                 DW-1, DW-2, ... (M개, 선택)
+                                                 부대장 = Opus 4.8 이상 필수
+                                                 헤드리스 claude -p 세션에서
+                                                 Workflow 도구 직접 호출 (포병)
+  └─ 분대장 (Sonnet 기본)                          (제병협동: 보병 + 포병)
   └─ 정규병 12 (Haiku/Sonnet)
   └─ 예비병 3 (정원 외)
 
-  용병 풀 (공유 자산):  Codex · Gemini · Grok · Perplexity
+  용병 풀 (공유 자산, 특수정찰):  Codex · Gemini · Grok · Perplexity
 ```
+
+> **DW 부대(Dynamic Workflow Unit)** — 일반 분대(Alpha~Lima)가 보병이라면 DW 부대는 포병(대량 화력). NATO 호출부호 없는 특수부대로, 부대장이 별도 헤드리스 `claude -p` 세션에서 `Workflow` 도구를 직접 호출해 DW 엔진을 가동한다. 소대장 컨텍스트는 무손상으로 유지된다. **Claude Pro 이상 + Opus 4.8 이상 환경에서만 가동**. 일반 분대 + DW 부대 + 용병 = 제병협동(諸兵協同) 지휘 체계.
 
 전체 구조는 [`백호-platoon-formation/platoon_formation.svg`](./백호-platoon-formation/platoon_formation.svg)를 참조하세요.
 

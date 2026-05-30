@@ -49,11 +49,11 @@
   <rect x="420" y="115" width="260" height="46" rx="23" fill="#F59E0B" filter="url(#shadow)"/>
   <text x="550" y="144" text-anchor="middle" fill="#FFFFFF" font-size="17" font-weight="bold">지휘관 (사용자 / PO)</text>
 
-  <!-- Phase 0 운영 모드 박스 (지휘관 좌측) -->
+  <!-- Phase 0 소대 추가 여부 박스 (지휘관 좌측) -->
   <g filter="url(#shadowSm)">
     <rect x="50" y="115" width="350" height="46" rx="8" fill="#FFFFFF" stroke="#475569" stroke-width="1.2" stroke-dasharray="5,3"/>
-    <text x="225" y="135" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="bold">Phase 0 · 운영 모드</text>
-    <text x="225" y="151" text-anchor="middle" fill="#475569" font-size="10">단일 소대 (기본) · 병렬 소대 (tmux 다중 패널)</text>
+    <text x="225" y="135" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="bold">Phase 0 · 소대 추가 여부</text>
+    <text x="225" y="151" text-anchor="middle" fill="#475569" font-size="10">소대 1개 (기본) / N개 (Claude Code 내부 동시 운영)</text>
   </g>
 
   <!-- 편제 공식 박스 (지휘관 우측) -->
@@ -272,11 +272,12 @@
   </g>
 
   <!-- ============================================ -->
-  <!-- 5-D. B/C형 확장 안내 (분대 우측 하단)            -->
+  <!-- 5-D. B/C형 확장 안내 + DW 부대 (분대 우측 하단)   -->
   <!-- ============================================ -->
   <g filter="url(#shadowSm)">
-    <rect x="50" y="730" width="1000" height="36" rx="8" fill="#FFFFFF" stroke="#64748b" stroke-width="1" stroke-dasharray="6,3"/>
-    <text x="550" y="753" text-anchor="middle" fill="#475569" font-size="11"><tspan font-weight="bold" fill="#1e293b">B형 확장</tspan> Delta · Echo 추가 (5분대)  ·  <tspan font-weight="bold" fill="#1e293b">C형 확장</tspan> Foxtrot ~ Lima (NATO 호출부호 순)  ·  분대 수는 지휘관이 임무 부여 시 결정</text>
+    <rect x="50" y="725" width="1000" height="56" rx="8" fill="#FFFFFF" stroke="#64748b" stroke-width="1" stroke-dasharray="6,3"/>
+    <text x="550" y="745" text-anchor="middle" fill="#475569" font-size="11"><tspan font-weight="bold" fill="#1e293b">일반 분대</tspan> (보병) — B형 확장 Delta·Echo (5분대) · C형 확장 Foxtrot~Lima (NATO 호출부호 순)</text>
+    <text x="550" y="767" text-anchor="middle" fill="#92400e" font-size="11"><tspan font-weight="bold" fill="#9a3412">+ DW 부대</tspan> (포병 · 특수부대, NATO 호출부호 없음) — DW-1, DW-2, … (N개) · <tspan font-weight="bold">Opus 4.8 + Claude Pro 이상 필수</tspan> · Phase 1.5에서 일반 분대와 함께 결정</text>
   </g>
 
   <!-- ============================================ -->
@@ -401,7 +402,7 @@
     <rect x="50" y="1166" width="1000" height="110" rx="12" fill="#FFFFFF"/>
     <rect x="50" y="1166" width="1000" height="34" rx="12" fill="#1e293b"/>
     <rect x="50" y="1186" width="1000" height="14" fill="#1e293b"/>
-    <text x="550" y="1189" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">운용 프로세스 · 지휘관 개입 3회</text>
+    <text x="550" y="1189" text-anchor="middle" fill="#e2e8f0" font-size="14" font-weight="bold">운용 프로세스 · 지휘관 개입 4회 (개입 ⓪: Phase 0 소대 추가 여부 / ①~③: 임무·승인·해산)</text>
 
     <line x1="80" y1="1230" x2="1020" y2="1230" stroke="#94a3b8" stroke-width="2.5" marker-end="url(#arrowGray)"/>
 
