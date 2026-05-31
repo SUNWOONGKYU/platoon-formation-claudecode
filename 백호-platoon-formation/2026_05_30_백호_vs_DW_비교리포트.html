@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>백호(白虎) 특허 vs Dynamic Workflows — 심층 비교 리포트</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --border: #2a3347;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --gold: #f4c542;
+    --gold-dim: #c9a230;
+    --gold-bg: rgba(244,197,66,0.08);
+    --blue: #4a9eff;
+    --blue-dim: #2c7dd9;
+    --blue-bg: rgba(74,158,255,0.08);
+    --green: #4ade80;
+    --red: #f87171;
+    --purple: #c084fc;
+    --tab-active: #1e2535;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner { max-width: 1100px; margin: 0 auto; }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .header h1 span.gold { color: var(--gold); }
+  .header h1 span.blue { color: var(--blue); }
+  .header-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-gold { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(244,197,66,0.25); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(74,158,255,0.25); }
+  .badge-green { background: rgba(74,222,128,0.08); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+
+  /* ── Tab nav ── */
+  .tab-nav {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .18s, border-color .18s;
+    letter-spacing: 0.1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* ── Content ── */
+  .content { max-width: 1100px; margin: 0 auto; padding: 36px 40px 60px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Section titles ── */
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 28px 0 12px;
+    letter-spacing: 0.2px;
+  }
+  h3.blue { color: var(--blue); }
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 20px;
+  }
+  .card-gold { border-left: 3px solid var(--gold); background: var(--gold-bg); }
+  .card-blue { border-left: 3px solid var(--blue); background: var(--blue-bg); }
+  .card-green { border-left: 3px solid var(--green); background: rgba(74,222,128,0.06); }
+  .card-red { border-left: 3px solid var(--red); background: rgba(248,113,113,0.06); }
+  .card-purple { border-left: 3px solid var(--purple); background: rgba(192,132,252,0.06); }
+
+  /* ── Two-col ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+  .col-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .col-header .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* ── Tables ── */
+  .tbl-wrap { overflow-x: auto; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead tr { background: var(--bg3); }
+  thead th {
+    padding: 11px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  td { padding: 10px 14px; vertical-align: top; }
+  td:first-child { color: var(--text-dim); font-weight: 600; font-size: 13px; }
+  td .gold-text { color: var(--gold); }
+  td .blue-text { color: var(--blue); }
+  td .green-text { color: var(--green); }
+  td .red-text { color: var(--red); }
+
+  /* ── Code blocks ── */
+  pre {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: 'Consolas', 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 14px 0;
+    color: #a8c9f0;
+  }
+  code {
+    font-family: 'Consolas', 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    background: rgba(255,255,255,0.07);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #93c5fd;
+  }
+
+  /* ── Quote ── */
+  blockquote {
+    border-left: 3px solid var(--gold);
+    padding: 12px 18px;
+    background: var(--gold-bg);
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    color: var(--text);
+    font-style: italic;
+  }
+
+  /* ── Lists ── */
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 6px; }
+  li strong { color: var(--text); }
+
+  /* ── Verdict chips ── */
+  .verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .verdict-win { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+  .verdict-rev { background: rgba(244,197,66,0.12); color: var(--gold); border: 1px solid rgba(244,197,66,0.3); }
+  .verdict-neutral { background: rgba(148,163,184,0.1); color: var(--text-dim); border: 1px solid rgba(148,163,184,0.2); }
+
+  /* ── Debate cards ── */
+  .debate-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .debate-header {
+    background: var(--bg3);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .debate-header .title { font-weight: 700; font-size: 14px; }
+  .debate-body { padding: 16px 18px; }
+  .debate-row { margin-bottom: 10px; }
+  .debate-row .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .debate-row.claim .label { color: var(--red); }
+  .debate-row.rebuttal .label { color: var(--green); }
+  .debate-row.conclusion .label { color: var(--gold); }
+
+  /* ── Tree diagram ── */
+  .tree {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    font-family: 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 14px 0;
+  }
+  .tree .t-root { color: var(--gold); font-weight: 700; }
+  .tree .t-infantry { color: #86efac; }
+  .tree .t-artillery { color: var(--red); font-weight: 600; }
+  .tree .t-recon { color: #818cf8; }
+  .tree .t-dim { color: var(--text-dim); }
+
+  /* ── Run ID badge ── */
+  .run-id {
+    display: inline-block;
+    background: rgba(74,158,255,0.1);
+    border: 1px solid rgba(74,158,255,0.3);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--blue);
+  }
+
+  /* ── Warning / Note box ── */
+  .note-box {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: rgba(248,113,113,0.07);
+    border: 1px solid rgba(248,113,113,0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13.5px;
+  }
+  .note-box .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .note-box.ok { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.25); }
+
+  /* ── KPI row ── */
+  .kpi-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+  .kpi {
+    flex: 1; min-width: 130px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    text-align: center;
+  }
+  .kpi .val { font-size: 26px; font-weight: 800; line-height: 1.1; }
+  .kpi .lbl { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ── Step list ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .steps li::before {
+    content: counter(step);
+    width: 26px; height: 26px;
+    background: var(--gold);
+    color: #0f1117;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .steps li .step-content { flex: 1; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+  /* ── Scroll top ── */
+  .scroll-hint { text-align: right; font-size: 11px; color: var(--text-dim); margin-bottom: 10px; }
+
+  /* ── Mobile optimization (≤600px) ── */
+  @media (max-width: 600px) {
+    body { font-size: 14px; line-height: 1.62; -webkit-text-size-adjust: 100%; }
+    .header { padding: 16px 16px 12px; }
+    .header h1 { font-size: 17px; line-height: 1.35; }
+    .header-meta { gap: 10px; }
+    .header-meta span { font-size: 11px !important; }
+    .tab-nav { padding: 0 6px; gap: 0; }
+    .tab-btn { padding: 11px 10px; font-size: 12px; }
+    .content { padding: 20px 14px 48px; }
+    h2 { font-size: 17px; margin-bottom: 16px; }
+    h3 { font-size: 13.5px; margin: 22px 0 10px; }
+    p { margin-bottom: 12px; }
+    .card { padding: 15px 15px; border-radius: 9px; }
+    .card-gold, .card-blue, .card-green, .card-red, .card-purple { border-left-width: 3px; }
+    .two-col { gap: 13px; }
+    table { font-size: 12.5px; }
+    th, td { padding: 8px 10px; }
+    thead th { font-size: 10.5px; letter-spacing: 0.2px; }
+    pre { font-size: 11.5px; padding: 12px 12px; }
+    code { font-size: 11.5px; padding: 1px 5px; }
+    blockquote { padding: 10px 14px; }
+    .tree { font-size: 10.5px; padding: 14px 12px; line-height: 1.7; }
+    .kpi-row { gap: 10px; }
+    .kpi { min-width: 100%; flex-basis: 100%; padding: 14px 16px; }
+    .kpi .val { font-size: 22px; }
+    .debate-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .debate-body { padding: 14px 14px; }
+    .steps li { gap: 10px; }
+    .steps li::before { width: 23px; height: 23px; font-size: 11px; }
+    ul, ol { padding-left: 18px; }
+    .note-box { padding: 10px 12px; font-size: 12.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>
+      <span class="gold">백호(白虎) 특허</span>
+      &nbsp;vs&nbsp;
+      <span class="blue">Anthropic Dynamic Workflows</span>
+    </h1>
+    <div class="header-meta">
+      <span style="color:var(--text-dim);font-size:13px">군 소대 편제 방식 AI 작업팀 설계 방법론 vs 병렬 서브에이전트 실행 엔진 — 심층 비교</span>
+    </div>
+  </div>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview', this)">개요</button>
+  <button class="tab-btn" onclick="switchTab('arch', this)">아키텍처 비교</button>
+  <button class="tab-btn" onclick="switchTab('debate', this)">약점 토론 6선</button>
+  <button class="tab-btn" onclick="switchTab('strengths', this)">장단점</button>
+  <button class="tab-btn" onclick="switchTab('dw', this)">DW 부대 설계</button>
+  <button class="tab-btn" onclick="switchTab('conclusion', this)">결론</button>
+</div>
+
+<div class="content">
+
+<!-- ===== TAB 1: 개요 ===== -->
+<div id="tab-overview" class="tab-panel active">
+  <h2>1 · 개요</h2>
+
+  <div class="two-col">
+    <div class="card card-gold">
+      <div class="col-header">
+        <span class="dot" style="background:var(--gold)"></span>
+        <span>백호(白虎) 특허(출원 10-2026-0041235)</span>
+        <span class="badge badge-gold" style="margin-left:auto">설계 방법론</span>
+      </div>
+      <p>군 소대 편제를 응용한 <strong>계층적 다중 AI 에이전트 작업팀 편성·운용 방법론</strong>.</p>
+      <p>특허출원 10-2026-0041235 (출원일 2026.03.07, 발명자: 선웅규). 청구항 15개 (독립 3 + 종속 12).</p>
+      <p style="margin-bottom:0"><strong>편제 구조:</strong></p>
+      <ul style="margin-top:6px">
+        <li><strong>소대장 (1명)</strong> — Opus, 오케스트레이션·전략적 의사결정</li>
+        <li><strong>분대장 (N명, ≥3)</strong> — Sonnet, 분야별 전문 관리자</li>
+        <li><strong>분대원 (N×12명)</strong> — Haiku/Sonnet, 실행 병력</li>
+        <li><strong>용병 (4명)</strong> — 외부 AI 공유 풀 (Codex/Gemini/Grok/Perplexity)</li>
+      </ul>
+    </div>
+
+    <div class="card card-blue">
+      <div class="col-header">
+        <span class="dot" style="background:var(--blue)"></span>
+        <span>Dynamic Workflows (DW)</span>
+        <span class="badge badge-blue" style="margin-left:auto">실행 엔진</span>
+      </div>
+      <p>Anthropic이 2026.05.28 Opus 4.8과 함께 발표한 <strong>병렬 서브에이전트 오케스트레이션 엔진</strong>.</p>
+      <ul>
+        <li>Claude가 JS 오케스트레이션 스크립트 작성</li>
+        <li>런타임이 백그라운드에서 스크립트 실행</li>
+        <li>병렬 서브에이전트 동시 16 / 누적 1,000개</li>
+        <li>중간 결과를 스크립트 변수에 격리 → 컨텍스트 절약</li>
+        <li>실증: Bun 75만 줄 코드베이스 11일 처리</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-purple" style="margin-top:8px">
+    <strong style="color:var(--purple)">핵심 전제 — 층위가 다르다</strong>
+    <p style="margin-top:8px;margin-bottom:0">
+      백호 특허와 DW는 <strong>경쟁 기술이 아니다</strong>. 백호 특허는 <em>설계 방법론/인지 골격</em>(소프트웨어 위 레이어), DW는 <em>실행 엔진</em>(런타임 레이어).
+      "DW가 나오면 백호 특허가 쓸모없어지는가?"라는 질문 자체가 잘못된 전제다.
+      백호 특허는 DW를 <strong>포병 부대</strong>로 병과에 편입할 수 있다.
+    </p>
+  </div>
+
+  <h3>백호 특허 핵심 메커니즘 5가지</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>#</th><th>메커니즘</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td>①</td><td><span class="gold-text">통신 O(n²) → O(n)</span></td><td>완전 연결 대신 계층 구조로 통신 채널 수를 선형 감축</td></tr>
+        <tr><td>②</td><td><span class="gold-text">모델 등급 차등 × 이중 비용 절감</span></td><td>고비용 모델(소대장)은 소수, 다수(분대원)는 경량 모델 — 곱셈 결합 절감</td></tr>
+        <tr><td>③</td><td><span class="gold-text">컨텍스트 오염 차단</span></td><td>청구항 12: 분대원/DW 작업이 소대장 컨텍스트로 유입되지 않도록 계층 격리</td></tr>
+        <tr><td>④</td><td><span class="gold-text">인간 게이트 3회</span></td><td>①임무 부여 ②작전 개시 승인 ③해산 승인 — 구조적 인간 통제</td></tr>
+        <tr><td>⑤</td><td><span class="gold-text">이종 외부AI 공유 풀</span></td><td>Claude 생태계 밖의 AI를 병과로 통합, 동종 편향 차단</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ===== TAB 2: 아키텍처 비교 ===== -->
+<div id="tab-arch" class="tab-panel">
+  <h2>2 · 아키텍처 비교</h2>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th style="color:var(--gold)">백호 특허</th>
+          <th style="color:var(--blue)">Dynamic Workflows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>설계 철학</td>
+          <td class="gold-text">군 소대 편제 — 인간 조직 원리의 AI 적용</td>
+          <td class="blue-text">병렬 프로그래밍 — 코드 오케스트레이션</td>
+        </tr>
+        <tr>
+          <td>층위</td>
+          <td class="gold-text">설계 방법론 / 인지 골격</td>
+          <td class="blue-text">실행 엔진 (런타임 수준)</td>
+        </tr>
+        <tr>
+          <td>오케스트레이터</td>
+          <td>소대장(Opus) — AI가 전략적 판단</td>
+          <td>Workflow 스크립트 — JS 코드가 제어</td>
+        </tr>
+        <tr>
+          <td>에이전트 수</td>
+          <td>1+N+N×12+4 (계층 고정 편제)</td>
+          <td>동시 16 / 총 1,000 (동적 확장)</td>
+        </tr>
+        <tr>
+          <td>계층 구조</td>
+          <td class="gold-text">3층 (소대장-분대장-분대원)</td>
+          <td>단층 (오케스트레이터-서브에이전트)</td>
+        </tr>
+        <tr>
+          <td>모델 다양성</td>
+          <td class="gold-text">Opus/Sonnet/Haiku 계층 차등 + 이종 외부AI</td>
+          <td>Claude 단일 생태계 (동종)</td>
+        </tr>
+        <tr>
+          <td>컨텍스트 격리</td>
+          <td>계층 분리로 소대장 컨텍스트 무손상 (청구항 12)</td>
+          <td>스크립트 변수 격리</td>
+        </tr>
+        <tr>
+          <td>통신 경로</td>
+          <td class="gold-text">수직(지휘) + 수평(협업) 혼합 구조</td>
+          <td>중앙 스크립트 변수 집중</td>
+        </tr>
+        <tr>
+          <td>인간 개입</td>
+          <td class="gold-text">3회 게이트 (구조적 필수)</td>
+          <td class="blue-text">없음 (완전 자동)</td>
+        </tr>
+        <tr>
+          <td>외부AI 통합</td>
+          <td class="gold-text">공유 풀 (Codex/Gemini/Grok/Perplexity)</td>
+          <td>Claude 전용</td>
+        </tr>
+        <tr>
+          <td>적합 작업</td>
+          <td class="gold-text">복합 도메인 / 다중 전문성 / 장기 프로젝트</td>
+          <td class="blue-text">대규모 동종 병렬 / 코드 마이그레이션</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>운용 특성 비교</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>운용 항목</th><th style="color:var(--gold)">백호 특허</th><th style="color:var(--blue)">DW</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>강점 영역</td>
+          <td class="gold-text">복합 도메인, 다전문성, 장기 프로젝트, 인간 판단 필요 작업</td>
+          <td class="blue-text">동종 대규모 병렬, 코드 마이그레이션, 완전 자동화 가능 작업</td>
+        </tr>
+        <tr>
+          <td>약점 영역</td>
+          <td>완전그래프형 대규모 단일 의존 작업<br><span class="green-text">→ DW 부대로 흡수 해결</span></td>
+          <td>복합 판단, 도메인 혼합, 인간 개입 필요 작업</td>
+        </tr>
+        <tr>
+          <td>인간 통제</td>
+          <td class="gold-text">3회 게이트, 소대장 상시 개입 가능</td>
+          <td>스크립트 자동 실행, 개입 경로 제한</td>
+        </tr>
+        <tr>
+          <td>적응성</td>
+          <td class="gold-text">임무 중 방향 조정 가능</td>
+          <td>스크립트 재작성 필요</td>
+        </tr>
+        <tr>
+          <td>통신 비용</td>
+          <td class="gold-text">O(n²)→O(n) 계층화 — 인지 부하·컨텍스트 오버헤드 감소</td>
+          <td class="blue-text">변수 공유(직접 채널 없음) — O(1)</td>
+        </tr>
+        <tr>
+          <td>검증 품질</td>
+          <td class="gold-text">이종 외부AI 교차 검증 (Codex/Gemini/Grok/Perplexity, 적대적 관점)</td>
+          <td>동종 Claude 병렬 검증 (동일 모델 패밀리 편향 위험)</td>
+        </tr>
+        <tr>
+          <td>확장성</td>
+          <td>편제 추가(분대 증설) + DW 부대 투입 가능</td>
+          <td class="blue-text">동시 1,000 에이전트 (플랫폼 제공)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ===== TAB: 장단점 ===== -->
+<div id="tab-strengths" class="tab-panel">
+  <h2>장단점</h2>
+
+  <h3>백호(白虎) 특허(출원 10-2026-0041235)</h3>
+  <div class="two-col">
+    <div class="card card-green">
+      <div class="col-header">
+        <span class="dot" style="background:var(--green)"></span>
+        강점
+      </div>
+      <ul style="margin-bottom:0">
+        <li><strong>계층 분산</strong> — 3층 편제(소대장-분대장-분대원)로 통신 O(n²)→O(n), 인지 부하·컨텍스트 오버헤드 감소</li>
+        <li><strong>인간 통제 게이트</strong> — 임무 부여·작전 개시·해산 3회 게이트로 구조적 인간 통제, 작전 중 즉시 개입 가능</li>
+        <li><strong>이종 교차 검증</strong> — Codex/Gemini/Grok/Perplexity 이종 외부AI 공유 풀로 동종 편향을 구조적으로 차단</li>
+        <li><strong>DW 부대 흡수</strong> — DW를 포병 부대로 병과 편입, 제병협동 지휘 체계 구성</li>
+        <li><strong>모델 등급 차등</strong> — Opus/Sonnet/Haiku 차등 배치 × 작업량 분산으로 곱셈형 비용 절감</li>
+      </ul>
+    </div>
+    <div class="card card-red">
+      <div class="col-header">
+        <span class="dot" style="background:var(--red)"></span>
+        단점
+      </div>
+      <ul style="margin-bottom:0">
+        <li><strong>편제 설계 필요</strong> — 분대 구성·병과 배치를 사전에 설계해야 하며 운용 진입 장벽이 있다</li>
+        <li><strong>분대장(Sonnet) 한계</strong> — Sonnet 분대장이 복잡한 위임 판단에서 한계를 보일 수 있다 (Opus 대비)</li>
+        <li><strong>조율 토큰 오버헤드</strong> — 계층 간 통신 메시지가 추가 토큰을 소비 (의도 정합성 보험료 성격)</li>
+        <li><strong>실측 벤치마크 수집 중</strong> — 동일 작업 비용·품질 실측 데이터가 아직 부족</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="blue">Dynamic Workflows</h3>
+  <div class="two-col">
+    <div class="card card-green">
+      <div class="col-header">
+        <span class="dot" style="background:var(--green)"></span>
+        강점
+      </div>
+      <ul style="margin-bottom:0">
+        <li><strong>대규모 병렬</strong> — 동시 16 / 누적 1,000 서브에이전트로 대량 화력 처리</li>
+        <li><strong>결정론적 재현</strong> — JS 오케스트레이션 스크립트 기반이라 동일 입력에 동일 실행 경로 재현</li>
+        <li><strong>플랫폼 네이티브</strong> — Claude Code 런타임에 내장된 실행 엔진, 변수 격리로 컨텍스트 절약</li>
+      </ul>
+    </div>
+    <div class="card card-red">
+      <div class="col-header">
+        <span class="dot" style="background:var(--red)"></span>
+        단점
+      </div>
+      <ul style="margin-bottom:0">
+        <li><strong>동종 검증</strong> — Claude 단일 모델 패밀리 병렬 검증이라 동일 착각을 공유할 편향 위험 ("거울 앞에서 자기 얼굴 검증")</li>
+        <li><strong>인간 개입 약함</strong> — 스크립트 자동 실행 중 인간이 방향을 바꾸기 어렵고 구조적 게이트가 없다</li>
+        <li><strong>복합 도메인 한계</strong> — 다전문성·예외 판단이 섞인 작업보다 동종 대규모 병렬에 적합</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== TAB 5: 약점 토론 ===== -->
+<div id="tab-debate" class="tab-panel">
+  <h2>3 · 약점 토론 6선 — 반박 결산</h2>
+  <p style="color:var(--text-dim);margin-bottom:20px">오늘(2026-05-30) 백호 특허 약점에 대한 심층 검토. <strong>전항목 반박 우세</strong>로 결론.</p>
+
+  <!-- 약점 1 -->
+  <div class="debate-card">
+    <div class="debate-header">
+      <span class="title">약점 1 · 조율 토큰 비용 과다</span>
+      <span class="verdict verdict-win">반박 우세</span>
+    </div>
+    <div class="debate-body">
+      <div class="debate-row claim"><div class="label">약점 주장</div>소대장-분대장 간 통신 메시지가 추가 토큰을 소비한다.</div>
+      <div class="debate-row rebuttal"><div class="label">반박</div>의도 정합성(misalignment) 방지 비용으로 정당화된다. 분대원 수백 개가 엉뚱한 방향으로 달리다가 재작업하는 비용이 훨씬 크다. 조율 토큰은 <strong>"보험료"</strong>다.</div>
+      <div class="debate-row conclusion"><div class="label">결론</div>약점이 아닌 의도적 설계 선택</div>
+    </div>
+  </div>
+
+  <!-- 약점 2 -->
+  <div class="debate-card">
+    <div class="debate-header">
+      <span class="title">약점 2 · 결정론·재현성 부족</span>
+      <span class="verdict verdict-win">반박 우세</span>
+    </div>
+    <div class="debate-body">
+      <div class="debate-row claim"><div class="label">약점 주장</div>소대장-분대장 간 "의사소통"이 비결정론적이라 같은 임무도 다른 결과를 낸다.</div>
+      <div class="debate-row rebuttal"><div class="label">반박</div>융통성 자체가 강점이다. 코드 마이그레이션처럼 완전히 정의 가능한 작업은 DW가 낫지만, 설계 판단·복합 도메인·예외 처리가 섞인 작업은 결정론보다 <strong>적응 능력</strong>이 더 중요하다. 공식화 가능한 절차는 스킬로 정립하면 된다.</div>
+      <div class="debate-row conclusion"><div class="label">결론</div>작업 유형에 따른 적합성 차이일 뿐, 구조적 약점 아님</div>
+    </div>
+  </div>
+
+  <!-- 약점 3 -->
+  <div class="debate-card">
+    <div class="debate-header">
+      <span class="title">약점 3 · 작전 중 개입 불가</span>
+      <span class="verdict verdict-win">반박 우세</span>
+    </div>
+    <div class="debate-body">
+      <div class="debate-row claim"><div class="label">약점 주장</div>분대원이 작업 중 블로커를 만났을 때 소대장이 즉각 개입하기 어렵다.</div>
+      <div class="debate-row rebuttal"><div class="label">반박</div>"게이트 3회" 원칙은 불필요한 개입 최소화 원칙이지, 긴급 개입을 금지하는 규정이 아니다. 소대장은 언제든 SendMessage로 개입 가능하다. DW는 스크립트 실행 중 인간이 방향을 바꾸기 <strong>더 어렵다</strong>.</div>
+      <div class="debate-row conclusion"><div class="label">결론</div>원칙≠금지, 오히려 백호 특허가 DW보다 인간 개입이 유연함</div>
+    </div>
+  </div>
+
+  <!-- 약점 4 -->
+  <div class="debate-card">
+    <div class="debate-header">
+      <span class="title">약점 4 · 의존 작업 컨텍스트 병목</span>
+      <span class="verdict verdict-win">반박 우세</span>
+    </div>
+    <div class="debate-body">
+      <div class="debate-row claim"><div class="label">약점 주장</div>A→B→C 순차 의존하는 작업에서 분대 간 인계가 병목이 된다.</div>
+      <div class="debate-row rebuttal"><div class="label">반박</div>수평 교신(청구항 8)으로 분대장 간 직접 데이터 공유가 가능하다. 소대장을 경유하지 않고 Alpha→Bravo 직접 결과 전달. 컨텍스트도 분대별로 격리되어 오히려 소대장 컨텍스트 병목이 없다.</div>
+      <div class="debate-row conclusion"><div class="label">결론</div>수평 교신(청구항 8) + 컨텍스트 분산으로 해결됨</div>
+    </div>
+  </div>
+
+  <!-- 약점 5 -->
+  <div class="debate-card">
+    <div class="debate-header">
+      <span class="title">약점 5 · 플랫폼 의존성 및 실측 데이터 부족</span>
+      <span class="verdict verdict-neutral">일부 인정 (실측 한계)</span>
+    </div>
+    <div class="debate-body">
+      <div class="debate-row claim"><div class="label">약점 주장</div>Claude Code 전용이며 실제 성능 벤치마크가 없다.</div>
+      <div class="debate-row rebuttal"><div class="label">반박</div>
+        <strong>플랫폼 의존성</strong>: DW도 Anthropic 전용이다. 공평한 비교 불가. 반박 우세.<br>
+        <strong>실측 데이터</strong>: "약점"이 아니라 "수집 중인 한계점"이다. 존재하지 않는 데이터를 약점으로 삼는 것은 논리 오류. 단, 데이터 수집 계획은 필요하다.
+      </div>
+      <div class="debate-row conclusion"><div class="label">결론</div>플랫폼 반박 우세 / 실측은 "현재 한계" — 약점 분류 제외 적절</div>
+    </div>
+  </div>
+
+  <!-- 약점 6 -->
+  <div class="debate-card">
+    <div class="debate-header">
+      <span class="title">약점 6 · 적대적 검증 부재</span>
+      <span class="verdict verdict-rev">역전 — 백호 특허 강점으로 전환</span>
+    </div>
+    <div class="debate-body">
+      <div class="debate-row claim"><div class="label">약점 주장</div>분대원이 같은 Claude 모델이라 같은 오류를 공유할 수 있다.</div>
+      <div class="debate-row rebuttal"><div class="label">반박 (역전)</div>이것이 오히려 <strong>DW의 약점</strong>이다. 백호 특허는 이종 외부AI 공유 풀(Codex/Gemini/Grok/Perplexity)로 적대적 교차 검증이 구조적으로 내장되어 있다. DW의 동종 검증은 <em>"거울 앞에서 자기 얼굴을 검증하는 것"</em>이다.</div>
+      <div class="debate-row conclusion"><div class="label">결론</div>역전 — 백호 특허의 구조적 강점, DW의 구조적 약점</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== TAB 7: DW 부대 ===== -->
+<div id="tab-dw" class="tab-panel">
+  <h2>5 · DW 부대 설계 — 백호 특허가 DW를 병과로 흡수</h2>
+
+  <h3>5.1 실증 결과 (2026-05-30)</h3>
+
+  <div class="note-box">
+    <span class="icon">❌</span>
+    <div>
+      <strong>경로 1 — 팀메이트가 Workflow 도구 직접 보유</strong>: 실패<br>
+      팀메이트·서브에이전트 자리엔 <code>Workflow</code> 도구가 주입되지 않음.
+      <code>ToolSearch select:Workflow</code> → <code>No matching deferred tools found</code>.
+      Claude Code는 Workflow 도구를 <strong>최상위 세션에만</strong> 제공 (재귀 스폰 방지 설계).
+    </div>
+  </div>
+
+  <div class="note-box ok">
+    <span class="icon">✅</span>
+    <div>
+      <strong>경로 2 — 분대장이 Bash로 헤드리스 <code>claude -p</code> 띄워 DW 가동</strong>: 성공<br>
+      헤드리스 세션은 Opus 4.8 + Workflow 도구를 <strong>top-level 도구로 이미 보유</strong> (ToolSearch 로드 불필요).
+      핵심은 "Workflow 도구를 <strong>DIRECTLY 호출하라</strong>"고 명시하는 것.
+      <br><br>
+      <strong>실증 Run IDs:</strong><br>
+      <span class="run-id">wf_01d2c4b1-5ae</span> — agent_count 확인, subagent_tokens=42883<br>
+      <span class="run-id">wf_5807cf0e-36e</span> — agent_count 1, subagent_tokens 38624, 답 111을 PowerShell로 독립 재현 일치
+    </div>
+  </div>
+
+  <blockquote>
+    <strong>핵심</strong>: 헤드리스 <code>claude -p</code> 세션에선 Workflow 도구가 이미 top-level 도구로 주입된다. ToolSearch로 로드할 필요 없음.
+    핵심은 <code>"Workflow 도구를 DIRECTLY 호출하라"</code>고 명시하는 것.
+    <code>"Run a workflow..."</code> 자연어 키워드는 가짜 처리될 수 있으므로 사용 금지.
+  </blockquote>
+
+  <h3>5.2 DW 부대 개념 — "포병 특수부대"</h3>
+  <p style="color:var(--text-dim);font-size:13px;margin-bottom:12px">
+    DW 부대는 Alpha/Bravo/Charlie 등 NATO 호출부호 순번과 <strong>무관</strong>한 특수부대다. NATO 호출부호 대신 <strong>DW-1, DW-2…</strong>로 호칭하며,
+    <strong>Phase 1.5</strong>에서 일반 분대 수와 함께 편성 여부·수를 결정한다. 부대장은 <strong>Opus 4.8 이상 필수</strong>(헤드리스 세션이 Workflow 도구를 쥐어야 하므로).
+  </p>
+  <div class="note-box" style="background:rgba(74,158,255,0.07);border-color:rgba(74,158,255,0.25)">
+    <span class="icon">ℹ️</span>
+    <div><strong>플랜 요건</strong>: Dynamic Workflows는 <strong>Claude Max · Team · Enterprise</strong> 플랜에서만 가동된다. <strong>Pro 플랜은 미지원</strong>(Anthropic 공식) — Pro 이하 환경에서는 DW 부대를 편성하지 않고 일반 분대로 처리한다.</div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th></th><th>일반 분대 (NATO 호출부호 — Alpha, Bravo, Charlie…)</th><th style="color:var(--red)">DW 부대 (NATO 무관 특수부대)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>병과 비유</td>
+          <td>보병 (정밀·기동)</td>
+          <td class="red-text">포병 (대량 화력)</td>
+        </tr>
+        <tr>
+          <td>지휘 방식</td>
+          <td>분대장이 분대원에 위임</td>
+          <td>분대장이 직접 포 가동</td>
+        </tr>
+        <tr>
+          <td>부하</td>
+          <td>분대원 12명 (서브에이전트)</td>
+          <td class="red-text">DW 엔진 (동시 16, 총 1,000)</td>
+        </tr>
+        <tr>
+          <td>가동 방법</td>
+          <td>Task 도구로 분대원 투입</td>
+          <td>Bash로 <code>claude -p</code> 헤드리스 세션 → Workflow 도구 직접 호출</td>
+        </tr>
+        <tr>
+          <td>소대장 부담</td>
+          <td>낮음</td>
+          <td class="green-text">낮음 — 포격은 분대장 별도 진지에서 전담</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>5.3 소대장 컨텍스트 무손상 원칙 (청구항 12)</h3>
+  <div class="card card-gold">
+    <p>DW를 소대장이 직접 가동하면 수십~수백 에이전트의 출력이 소대장 컨텍스트로 유입되어 지휘 능력이 저하된다.
+    <em>소대장이 포를 쏘면서 어떻게 지휘하겠는가.</em></p>
+    <p style="margin-bottom:0">백호 특허의 해결: <strong>DW 부대장이 별도 헤드리스 프로세스에서 DW를 전담</strong>하고, 소대장에는 결과 요약만 보고된다.
+    소대장 컨텍스트 무손상. 이것이 기본 DW(소대장 직접 호출)보다 우월한 지점이다.</p>
+  </div>
+
+  <h3>5.4 DW 부대 가동 절차</h3>
+  <ol class="steps">
+    <li><div class="step-content"><strong>소대장이 판단</strong>: "DW형 작업"이라 판단 — 대규모 단일 의존 / 코드베이스 마이그레이션 / 완전그래프형 의존</div></li>
+    <li><div class="step-content"><strong>DW 부대장에게 위임</strong>: 소대장이 SendMessage로 DW 부대장에게 임무 전달</div></li>
+    <li>
+      <div class="step-content">
+        <strong>DW 부대장이 Bash로 헤드리스 claude 기동</strong>:
+        <pre>claude -p --output-format json \
+  "CALL the Workflow tool DIRECTLY with a script that {임무}.
+   Report agent_count from the result." 2>&1</pre>
+        <div class="note-box" style="margin-top:8px">
+          <span class="icon">⚠️</span>
+          <div><strong>헤드리스 세션에서 Workflow 도구는 이미 top-level 도구</strong> — ToolSearch 로드 불필요.<br>
+          <code>"Run a workflow..."</code> 자연어 키워드는 가짜 처리될 수 있음 — <strong>Workflow 도구 직접 호출</strong>을 명시해야 진짜 DW 발동.</div>
+        </div>
+      </div>
+    </li>
+    <li><div class="step-content"><strong>진짜 DW 발동</strong>: 헤드리스 세션(Opus 4.8)에서 병렬 에이전트 처리 → stdout에 결과 반환</div></li>
+    <li><div class="step-content"><strong>결과 수령 → 소대장 보고</strong>: DW 부대장이 결과 요약 → 소대장 컨텍스트 무손상</div></li>
+    <li><div class="step-content"><strong>교차 검증</strong>: 용병(이종 외부AI)으로 결과 교차 검증 후 채택</div></li>
+  </ol>
+
+  <h3>5.5 DW 투입 기준 (소대장 판단)</h3>
+  <ul>
+    <li>대규모 단일 상호의존 작업 (코드베이스 마이그레이션, 수백 파일 일괄 변환)</li>
+    <li>단일 공유 메모리가 유리한 완전그래프형 의존</li>
+    <li>다각도 교차 검증 리서치 (<code>/deep-research</code>)</li>
+  </ul>
+
+  <div class="card" style="background:rgba(248,113,113,0.07);border-color:rgba(248,113,113,0.2)">
+    <strong style="color:var(--red)">"고비용 특수부대" 원칙</strong>
+    <p style="margin-top:8px;margin-bottom:0">
+      DW 부대는 수십~수백 에이전트라 토큰 소비가 크다. 포병을 함부로 쓰지 않듯,
+      대량 화력이 정말 필요한 작전에만 신중 투입. (백호 특허 모델 차등 철학과 일치)
+    </p>
+  </div>
+</div>
+
+
+<!-- ===== TAB 8: 결론 ===== -->
+<div id="tab-conclusion" class="tab-panel">
+  <h2>6 · 결론</h2>
+
+  <h3>6.1 관계 정의 — 백호 특허 ⊃ DW</h3>
+  <p>백호 특허와 DW는 경쟁 관계가 아니다. <strong>백호 특허가 DW를 병과로 흡수</strong>한다.</p>
+
+  <div class="tree">
+    <div class="t-root">백호(白虎) 특허(출원 10-2026-0041235) — 설계 방법론/인지 골격</div>
+    <div style="margin-left:16px">
+      <div class="t-infantry">├── 보병 분대: Alpha, Bravo, Charlie, Delta, Echo  <span style="color:var(--text-dim);font-size:12px">(NATO 호출부호)</span></div>
+      <div class="t-dim" style="margin-left:20px">│   각 분대원 12명 (Haiku/Sonnet)</div>
+      <div class="t-artillery">├── DW 부대: DW-1, DW-2…  <span style="color:var(--text-dim);font-size:12px">(NATO 무관 특수부대 — Phase 1.5에서 편성 결정)</span></div>
+      <div class="t-dim" style="margin-left:20px">│   부대장(Opus 4.8)이 헤드리스 claude -p로 Workflow 도구 직접 호출 → DW 엔진 가동</div>
+      <div class="t-dim" style="margin-left:20px">│   동시 16 / 총 1,000 에이전트 화력 (Max·Team·Enterprise 플랜)</div>
+      <div class="t-recon">└── 특수정찰: 용병 공유 풀</div>
+      <div class="t-dim" style="margin-left:20px">    Codex, Gemini, Grok, Perplexity (이종 교차 검증)</div>
+    </div>
+  </div>
+
+  <p>이것이 <strong>제병협동(諸兵協同) 지휘 체계</strong>다: 보병(분대) + 포병(DW 부대) + 특수정찰(용병).</p>
+
+  <div class="card card-gold" style="margin-top:8px">
+    <strong style="color:var(--gold)">DW 부대 설계 요지 (백호 특허에 편입된 결론적 설계)</strong>
+    <ul style="margin-top:10px;margin-bottom:0">
+      <li><strong>편성</strong> — NATO 호출부호 없는 <strong>특수부대(DW-1, DW-2…)</strong>. <code>Phase 1.5</code>에서 일반 분대 수와 함께 편성 여부·수를 결정.</li>
+      <li><strong>가동</strong> — 부대장(<strong>Opus 4.8 이상</strong>)이 <code>Bash</code>로 헤드리스 <code>claude -p</code> 세션을 띄워 그 안에서 <strong>Workflow 도구를 직접 호출</strong>(키워드 아님). 헤드리스 세션은 Workflow가 이미 top-level 도구.</li>
+      <li><strong>소대장 무손상</strong> — 포격은 부대장의 별도 진지에서 전담, 소대장엔 결과 요약만 보고 (청구항 12).</li>
+      <li><strong>검증</strong> — DW의 동종 결과를 용병(이종 외부AI)으로 교차 검증 후 채택.</li>
+      <li><strong>제약</strong> — Max·Team·Enterprise 플랜 한정(Pro 미지원), "고비용 특수부대" 원칙으로 신중 투입.</li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <h3>6.2 DW 단독 대비 백호 특허+DW의 우월점</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>DW 단독 약점</th><th>백호 특허+DW 해결 방법</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="red-text">동종 검증 편향</td>
+          <td class="green-text">용병 이종 교차 검증으로 보완</td>
+        </tr>
+        <tr>
+          <td class="red-text">인간 게이트 부재</td>
+          <td class="green-text">소대장 승인 3회 게이트 유지</td>
+        </tr>
+        <tr>
+          <td class="red-text">소대장 컨텍스트 집중</td>
+          <td class="green-text">DW 부대장이 별도 진지에서 포격 전담</td>
+        </tr>
+        <tr>
+          <td class="red-text">복합 도메인 처리 한계</td>
+          <td class="green-text">보병 분대(Alpha, Bravo, Charlie 등 NATO 분대)가 전문성 분산 처리</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <blockquote>
+    <strong>한 줄 요약</strong>: 백호 특허는 "어떻게 싸울 것인가"의 작전 골격이고, DW는 "포병 화력"이다.
+    백호 특허 안에 DW가 포병 부대로 배속되면서 두 기술의 약점이 상호 보완된다.
+  </blockquote>
+</div>
+
+
+</div><!-- /content -->
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
